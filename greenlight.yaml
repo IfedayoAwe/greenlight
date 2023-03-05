@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # snippetbox:
+  #   image: snippetbox:1
+  #   container_name: snippetbox
+  #   restart: unless-stopped
+  #   ports: 
+  #     - '4000:4000'
+  #   environment:
+  #     - DBUSER=${DBUSER}
+  #     - DBPASS=${DBPASS}
+  #     - DBNAME=${DBNAME}
+
+  greenlight_db:
+    image: postgres:15-alpine
+    container_name: greenlight_db
+    restart: always
+    ports: 
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: ${DBPASS}
+      POSTGRES_DB: $(DBNAME)
+    volumes: 
+      - db-data:/var/lib/postgresql/data
+
+volumes: 
+  db-data:
+    driver: local
