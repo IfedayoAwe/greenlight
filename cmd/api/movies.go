@@ -108,7 +108,6 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 	if input.Title != nil {
 		movie.Title = *input.Title
 	}
-
 	if input.Year != nil {
 		movie.Year = *input.Year
 	}
