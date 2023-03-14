@@ -15,9 +15,9 @@ dropdb:
 	docker exec -it greenlight_db dropdb greenlight
 
 migrateup:
-    migrate -path ./migration -database "postgresql://postgres:654321@localhost:5432/greenlight?sslmode=disable" -verbose up
+	migrate -path=./migrations -database="postgres://postgres:654321@localhost/greenlight?sslmode=disable" -verbose up
 
 migratedown:
-    migrate -path ./migration -database "postgresql://postgres:654321t@localhost:5432/greenlight?sslmode=disable" -verbose down
+	migrate -path=./migrations -database="postgres://postgres:654321@localhost/greenlight?sslmode=disable" -verbose down
 
 .PHONY: start-db createdb dropdb migrateup migratedown
