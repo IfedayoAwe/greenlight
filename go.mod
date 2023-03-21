@@ -14,3 +14,5 @@ require (
 	github.com/go-mail/mail/v2 v2.3.0
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc
 )
+
+require github.com/felixge/httpsnoop v1.0.1 // indirect
