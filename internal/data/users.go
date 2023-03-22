@@ -67,6 +67,13 @@ func ValidatePasswordPlaintext(v *validator.Validator, password string) {
 	v.Check(len(password) <= 72, "password", "must not be more than 72 bytes long")
 }
 
+func ValidateChangePassword(v *validator.Validator, currentpassword, newpassword, confirmpassword string) {
+	ValidatePasswordPlaintext(v, newpassword)
+	v.Check(currentpassword != "", "currentpassword", "Current Password field cannot be empty")
+	v.Check(confirmpassword != "", "confirmpassword", "Confirm password field cannot be empty")
+	v.Check(newpassword == confirmpassword, "password mismatch", "New Password and password confirmation do not match")
+}
+
 func ValidateUser(v *validator.Validator, user *User) {
 	v.Check(user.Name != "", "name", "must be provided")
 	v.Check(len(user.Name) <= 500, "name", "must not be more than 500 bytes long")
@@ -204,4 +211,16 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 	}
 
 	return &user, nil
+}
+
+func (m UserModel) ChangePassword(id int64, newPassword string) error {
+
+	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
+	if err != nil {
+		return err
+	}
+	stmt := "UPDATE users SET password_hash = $1 WHERE id = $2"
+	_, err = m.DB.Exec(stmt, newHashedPassword, id)
+	return err
+
 }

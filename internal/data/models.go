@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	ErrRecordNotFound = errors.New("record not found")
-	ErrEditConflict   = errors.New("edit conflict")
+	ErrRecordNotFound     = errors.New("record not found")
+	ErrEditConflict       = errors.New("edit conflict")
+	ErrInvalidCredentials = errors.New("invalid credentials")
 )
 
 type Models struct {
@@ -29,6 +30,7 @@ type Models struct {
 		GetByEmail(email string) (*User, error)
 		Update(user *User) error
 		GetForToken(tokenScope, tokenPlaintext string) (*User, error)
+		ChangePassword(id int64, newPassword string) error
 	}
 	Permissions interface {
 		GetAllForUser(userID int64) (Permissions, error)

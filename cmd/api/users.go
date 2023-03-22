@@ -137,3 +137,61 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		CurrentPassword string `json:"currentpassword"`
+		NewPassword     string `json:"password"`
+		ConfirmPassword string `json:"confirmpassword"`
+	}
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+
+	if data.ValidateChangePassword(v, input.CurrentPassword, input.NewPassword, input.ConfirmPassword); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	user := app.contextGetUser(r)
+
+	match, err := user.Password.Matches(input.CurrentPassword)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	if !match {
+		app.invalidPasswordResponse(w, r)
+		return
+	}
+
+	err = app.models.Users.ChangePassword(user.ID, input.NewPassword)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.models.Tokens.DeleteAllForUser(data.ScopeAuthentication, user.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	token, err := app.models.Tokens.New(user.ID, 24*time.Hour, data.ScopeAuthentication)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"token": token}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+}
