@@ -24,6 +24,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/activation", app.createActivationTokenHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/password-reset", app.createPasswordResetTokenHandler)
 	router.HandlerFunc(http.MethodPut, "/v1/users/change-password", app.requireActivatedUser(app.changePasswordHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/users/update-details", app.requireActivatedUser(app.updateUserDetailsHandler))
 	router.Handler(http.MethodGet, "/debug/vars", expvar.Handler())
 	return app.metrics(app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router)))))
 }
