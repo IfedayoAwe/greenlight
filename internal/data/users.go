@@ -24,7 +24,7 @@ type User struct {
 	Email     string    `json:"email"`
 	Password  password  `json:"-"`
 	Activated bool      `json:"activated"`
-	Admin     bool      `json:"-"`
+	Admin     bool      `json:"admin"`
 	Version   int       `json:"-"`
 }
 
