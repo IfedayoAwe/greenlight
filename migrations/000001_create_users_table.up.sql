@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS users (
     email citext UNIQUE NOT NULL,
     password_hash bytea NOT NULL,
     activated bool NOT NULL,
+    admin bool NOT NULL DEFAULT false,
     version integer NOT NULL DEFAULT 1
 );

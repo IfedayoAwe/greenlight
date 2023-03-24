@@ -26,6 +26,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Name:      input.Name,
 		Email:     input.Email,
 		Activated: false,
+		Admin:     false,
 	}
 
 	err = user.Password.Set(input.Password)
@@ -314,8 +315,6 @@ func (app *application) resetUserPasswordHandler(w http.ResponseWriter, r *http.
 }
 
 func (app *application) updateUserDetailsHandler(w http.ResponseWriter, r *http.Request) {
-	user := app.contextGetUser(r)
-
 	var input struct {
 		Name  *string `json:"name"`
 		Email *string `json:"email"`
@@ -326,6 +325,8 @@ func (app *application) updateUserDetailsHandler(w http.ResponseWriter, r *http.
 		app.badRequestResponse(w, r, err)
 		return
 	}
+
+	user := app.contextGetUser(r)
 
 	if input.Name != nil {
 		user.Name = *input.Name
@@ -357,4 +358,50 @@ func (app *application) updateUserDetailsHandler(w http.ResponseWriter, r *http.
 		app.serverErrorResponse(w, r, err)
 	}
 
+}
+
+func (app *application) addMovieWritePermissionForUser(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Email string `json:"email"`
+	}
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+	if data.ValidateEmail(v, input.Email); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	user, err := app.models.Users.GetByEmail(input.Email)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			v.AddError("email", "no matching email address found")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.models.Permissions.AddForUser(user.ID, "movies:write")
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrDuplicatePermission):
+			app.duplicatePermisionResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"write movies": user.Email}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }

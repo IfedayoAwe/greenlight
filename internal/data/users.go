@@ -24,6 +24,7 @@ type User struct {
 	Email     string    `json:"email"`
 	Password  password  `json:"-"`
 	Activated bool      `json:"activated"`
+	Admin     bool      `json:"-"`
 	Version   int       `json:"-"`
 }
 
@@ -96,10 +97,10 @@ type UserModel struct {
 
 func (m UserModel) Insert(user *User) error {
 	query := `
-	INSERT INTO users (name, email, password_hash, activated)
-	VALUES ($1, $2, $3, $4)
+	INSERT INTO users (name, email, password_hash, activated, admin)
+	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id, created_at, version`
-	args := []interface{}{user.Name, user.Email, user.Password.hash, user.Activated}
+	args := []interface{}{user.Name, user.Email, user.Password.hash, user.Activated, user.Admin}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -117,7 +118,7 @@ func (m UserModel) Insert(user *User) error {
 
 func (m UserModel) GetByEmail(email string) (*User, error) {
 	query := `
-	SELECT id, created_at, name, email, password_hash, activated, version
+	SELECT id, created_at, name, email, password_hash, activated, admin, version
 	FROM users
 	WHERE email = $1`
 	var user User
@@ -130,6 +131,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 		&user.Email,
 		&user.Password.hash,
 		&user.Activated,
+		&user.Admin,
 		&user.Version,
 	)
 	if err != nil {
@@ -146,14 +148,15 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 func (m UserModel) Update(user *User) error {
 	query := `
 	UPDATE users
-	SET name = $1, email = $2, password_hash = $3, activated = $4, version = version + 1
-	WHERE id = $5 AND version = $6
+	SET name = $1, email = $2, password_hash = $3, activated = $4, admin = $5, version = version + 1
+	WHERE id = $6 AND version = $7
 	RETURNING version`
 	args := []interface{}{
 		user.Name,
 		user.Email,
 		user.Password.hash,
 		user.Activated,
+		user.Admin,
 		user.ID,
 		user.Version,
 	}
@@ -177,7 +180,7 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
 
 	query := `
-	SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.version
+	SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.admin, users.version
 	FROM users
 	INNER JOIN tokens
 	ON users.id = tokens.user_id
@@ -199,6 +202,7 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 		&user.Email,
 		&user.Password.hash,
 		&user.Activated,
+		&user.Admin,
 		&user.Version,
 	)
 	if err != nil {

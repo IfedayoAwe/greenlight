@@ -13,6 +13,7 @@ import (
 
 type Movie struct {
 	ID        int64     `json:"id"`
+	UserID    int64     `json:"-"`
 	CreatedAt time.Time `json:"-"`
 	Title     string    `json:"title"`
 	Year      int32     `json:"year,omitempty"`
@@ -42,11 +43,11 @@ type MovieModel struct {
 func (m MovieModel) Insert(movie *Movie) error {
 
 	query := `
-	INSERT INTO movies (title, year, runtime, genres)
-	VALUES ($1, $2, $3, $4)
+	INSERT INTO movies (user_id, title, year, runtime, genres)
+	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id, created_at, version`
 
-	args := []interface{}{movie.Title, movie.Year, movie.Runtime, pq.Array(movie.Genres)}
+	args := []interface{}{movie.UserID, movie.Title, movie.Year, movie.Runtime, pq.Array(movie.Genres)}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -61,7 +62,7 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 	}
 
 	query := `
-	SELECT id, created_at, title, year, runtime, genres, version
+	SELECT user_id, id, created_at, title, year, runtime, genres, version
 	FROM movies
 	WHERE id = $1`
 
@@ -72,6 +73,7 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 	defer cancel()
 
 	err := m.DB.QueryRowContext(ctx, query, id).Scan(
+		&movie.UserID,
 		&movie.ID,
 		&movie.CreatedAt,
 		&movie.Title,
@@ -97,8 +99,8 @@ func (m MovieModel) Update(movie *Movie) error {
 
 	query := `
 	UPDATE movies
-	SET title = $1, year = $2, runtime = $3, genres = $4, version = version + 1
-	WHERE id = $5 AND version = $6
+	SET title = $1, year = $2, runtime = $3, genres = $4, user_id = $5, version = version + 1
+	WHERE id = $6 AND version = $7
 	RETURNING version`
 
 	args := []interface{}{
@@ -106,6 +108,7 @@ func (m MovieModel) Update(movie *Movie) error {
 		movie.Year,
 		movie.Runtime,
 		pq.Array(movie.Genres),
+		movie.UserID,
 		movie.ID,
 		movie.Version,
 	}
@@ -155,7 +158,7 @@ func (m MovieModel) Delete(id int64) error {
 
 func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, Metadata, error) {
 	query := fmt.Sprintf(`
-	SELECT count(*) OVER(), id, created_at, title, year, runtime, genres, version
+	SELECT count(*) OVER(), user_id, id, created_at, title, year, runtime, genres, version
 	FROM movies
 	WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 	AND (genres @> $2 OR $2 = '{}')
@@ -182,6 +185,7 @@ func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*M
 
 		err := rows.Scan(
 			&totalRecords,
+			&movie.UserID,
 			&movie.ID,
 			&movie.CreatedAt,
 			&movie.Title,

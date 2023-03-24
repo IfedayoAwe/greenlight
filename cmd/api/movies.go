@@ -22,11 +22,14 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	user := app.contextGetUser(r)
+
 	movie := &data.Movie{
 		Title:   input.Title,
 		Year:    input.Year,
 		Runtime: input.Runtime,
 		Genres:  input.Genres,
+		UserID:  user.ID,
 	}
 
 	v := validator.New()
@@ -92,6 +95,11 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	if user := app.contextGetUser(r); user.ID != movie.UserID {
+		app.notPermittedResponse(w, r)
+		return
+	}
+
 	var input struct {
 		Title   *string       `json:"title"`
 		Year    *int32        `json:"year"`
@@ -148,7 +156,7 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = app.models.Movies.Delete(id)
+	movie, err := app.models.Movies.Get(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -156,6 +164,17 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
+		return
+	}
+
+	if user := app.contextGetUser(r); user.ID != movie.UserID {
+		app.notPermittedResponse(w, r)
+		return
+	}
+
+	err = app.models.Movies.Delete(id)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 

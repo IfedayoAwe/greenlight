@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/lib/pq"
@@ -52,6 +53,10 @@ func (m PermissionModel) GetAllForUser(userID int64) (Permissions, error) {
 	return permissions, nil
 }
 
+var (
+	ErrDuplicatePermission = errors.New("Duplicate permission made")
+)
+
 func (m PermissionModel) AddForUser(userID int64, codes ...string) error {
 	query := `
 	INSERT INTO users_permissions
@@ -59,5 +64,13 @@ func (m PermissionModel) AddForUser(userID int64, codes ...string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	_, err := m.DB.ExecContext(ctx, query, userID, pq.Array(codes))
-	return err
+	if err != nil {
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_permissions_pkey"`:
+			return ErrDuplicatePermission
+		default:
+			return err
+		}
+	}
+	return nil
 }
