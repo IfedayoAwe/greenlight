@@ -31,6 +31,7 @@ type Models struct {
 		Update(user *User) error
 		GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 		ChangePassword(id int64, newPassword string) error
+		Delete(id int64) error
 	}
 	Permissions interface {
 		GetAllForUser(userID int64) (Permissions, error)

@@ -315,6 +315,26 @@ func (app *application) updateUserDetailsHandler(w http.ResponseWriter, r *http.
 
 }
 
+func (app *application) deleteUserAccountHandler(w http.ResponseWriter, r *http.Request) {
+	user := app.contextGetUser(r)
+
+	err := app.models.Users.Delete(user.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "user account successfully deleted"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
 func (app *application) addMovieWritePermissionForUser(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Email string `json:"email"`
