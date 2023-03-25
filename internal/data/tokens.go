@@ -6,9 +6,11 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base32"
+	"net/http"
 	"time"
 
 	"github.com/IfedayoAwe/greenlight/internal/validator"
+	"github.com/tomasen/realip"
 )
 
 const (
@@ -21,11 +23,12 @@ type Token struct {
 	Plaintext string    `json:"token"`
 	Hash      []byte    `json:"-"`
 	UserID    int64     `json:"-"`
+	UserIP    string    `json:"-"`
 	Expiry    time.Time `json:"expiry"`
 	Scope     string    `json:"-"`
 }
 
-func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error) {
+func generateToken(userID int64, ttl time.Duration, scope string, r *http.Request) (*Token, error) {
 	token := &Token{
 		UserID: userID,
 		Expiry: time.Now().Add(ttl),
@@ -42,6 +45,9 @@ func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error
 	token.Plaintext = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
 	hash := sha256.Sum256([]byte(token.Plaintext))
 	token.Hash = hash[:]
+
+	token.UserIP = realip.FromRequest(r)
+
 	return token, nil
 }
 
@@ -54,8 +60,8 @@ type TokenModel struct {
 	DB *sql.DB
 }
 
-func (m TokenModel) New(userID int64, ttl time.Duration, scope string) (*Token, error) {
-	token, err := generateToken(userID, ttl, scope)
+func (m TokenModel) New(userID int64, ttl time.Duration, scope string, r *http.Request) (*Token, error) {
+	token, err := generateToken(userID, ttl, scope, r)
 	if err != nil {
 		return nil, err
 	}
@@ -65,21 +71,31 @@ func (m TokenModel) New(userID int64, ttl time.Duration, scope string) (*Token, 
 
 func (m TokenModel) Insert(token *Token) error {
 	query := `
-	INSERT INTO tokens (hash, user_id, expiry, scope)
-	VALUES ($1, $2, $3, $4)`
-	args := []interface{}{token.Hash, token.UserID, token.Expiry, token.Scope}
+	INSERT INTO tokens (hash, user_id, user_ip, expiry, scope)
+	VALUES ($1, $2, $3, $4, $5)`
+	args := []interface{}{token.Hash, token.UserID, token.UserIP, token.Expiry, token.Scope}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	_, err := m.DB.ExecContext(ctx, query, args...)
 	return err
 }
 
-func (m TokenModel) DeleteAllForUser(scope string, userID int64) error {
-	query := `
-	DELETE FROM tokens
-	WHERE scope = $1 AND user_id = $2`
+func (m TokenModel) DeleteAllForUser(scope string, userID int64, userIP *string) error {
+	query := "DELETE FROM tokens WHERE scope = $1 AND user_id = $2"
+	args := []interface{}{scope, userID}
+
+	// If userIP is provided, delete only that token
+	if userIP != nil {
+		query += " AND user_ip = $3"
+		args = append(args, *userIP)
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	_, err := m.DB.ExecContext(ctx, query, scope, userID)
-	return err
+
+	_, err := m.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	return nil
 }

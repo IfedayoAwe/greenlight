@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"errors"
+	"net/http"
 	"time"
 )
 
@@ -22,8 +23,8 @@ type Models struct {
 	}
 	Tokens interface {
 		Insert(token *Token) error
-		DeleteAllForUser(scope string, userID int64) error
-		New(userID int64, ttl time.Duration, scope string) (*Token, error)
+		DeleteAllForUser(scope string, userID int64, userIP *string) error
+		New(userID int64, ttl time.Duration, scope string, r *http.Request) (*Token, error)
 	}
 	Users interface {
 		Insert(user *User) error

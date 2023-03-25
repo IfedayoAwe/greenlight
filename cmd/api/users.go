@@ -7,6 +7,7 @@ import (
 
 	"github.com/IfedayoAwe/greenlight/internal/data"
 	"github.com/IfedayoAwe/greenlight/internal/validator"
+	"github.com/tomasen/realip"
 )
 
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +61,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, data.ScopeActivation)
+	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, data.ScopeActivation, r)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -128,7 +129,7 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.models.Tokens.DeleteAllForUser(data.ScopeActivation, user.ID)
+	err = app.models.Tokens.DeleteAllForUser(data.ScopeActivation, user.ID, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -179,13 +180,13 @@ func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = app.models.Tokens.DeleteAllForUser(data.ScopeAuthentication, user.ID)
+	err = app.models.Tokens.DeleteAllForUser(data.ScopeAuthentication, user.ID, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	token, err := app.models.Tokens.New(user.ID, 24*time.Hour, data.ScopeAuthentication)
+	token, err := app.models.Tokens.New(user.ID, 24*time.Hour, data.ScopeAuthentication, r)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -247,13 +248,13 @@ func (app *application) resetUserPasswordHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = app.models.Tokens.DeleteAllForUser(data.ScopePasswordReset, user.ID)
+	err = app.models.Tokens.DeleteAllForUser(data.ScopePasswordReset, user.ID, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	err = app.models.Tokens.DeleteAllForUser(data.ScopeAuthentication, user.ID)
+	err = app.models.Tokens.DeleteAllForUser(data.ScopeAuthentication, user.ID, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -309,6 +310,22 @@ func (app *application) updateUserDetailsHandler(w http.ResponseWriter, r *http.
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+}
+
+func (app *application) userLogoutHandler(w http.ResponseWriter, r *http.Request) {
+	user := app.contextGetUser(r)
+	ip := realip.FromRequest(r)
+	err := app.models.Tokens.DeleteAllForUser(data.ScopeAuthentication, user.ID, &ip)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "user sucessfully logged out"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
