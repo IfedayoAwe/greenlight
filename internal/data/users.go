@@ -218,13 +218,12 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 }
 
 func (m UserModel) ChangePassword(id int64, newPassword string) error {
-
 	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 	if err != nil {
 		return err
 	}
-	stmt := "UPDATE users SET password_hash = $1 WHERE id = $2"
-	_, err = m.DB.Exec(stmt, newHashedPassword, id)
+	query := "UPDATE users SET password_hash = $1 WHERE id = $2"
+	_, err = m.DB.Exec(query, newHashedPassword, id)
 	return err
 
 }

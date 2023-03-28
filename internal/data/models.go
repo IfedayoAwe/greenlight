@@ -38,13 +38,19 @@ type Models struct {
 		GetAllForUser(userID int64) (Permissions, error)
 		AddForUser(userID int64, codes ...string) error
 	}
+	UsersProfile interface {
+		Insert(profile *UserProfile) error
+		Update(profile *UserProfile) error
+		InsertProfilePic(userID int64) error
+	}
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
-		Movies:      MovieModel{DB: db},
-		Users:       UserModel{DB: db},
-		Tokens:      TokenModel{DB: db},
-		Permissions: PermissionModel{DB: db},
+		Movies:       MovieModel{DB: db},
+		Users:        UserModel{DB: db},
+		Tokens:       TokenModel{DB: db},
+		Permissions:  PermissionModel{DB: db},
+		UsersProfile: ProfileModel{DB: db},
 	}
 }

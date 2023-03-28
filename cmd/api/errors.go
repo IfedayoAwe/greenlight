@@ -73,7 +73,7 @@ func (app *application) authenticationRequiredResponse(w http.ResponseWriter, r 
 
 func (app *application) duplicatePermisionResponse(w http.ResponseWriter, r *http.Request) {
 	message := "This user already has this permission"
-	app.errorResponse(w, r, http.StatusUnauthorized, message)
+	app.errorResponse(w, r, http.StatusUnprocessableEntity, message)
 }
 
 func (app *application) inactiveAccountResponse(w http.ResponseWriter, r *http.Request) {
@@ -89,4 +89,9 @@ func (app *application) notPermittedResponse(w http.ResponseWriter, r *http.Requ
 func (app *application) invalidPasswordResponse(w http.ResponseWriter, r *http.Request) {
 	message := "invalid password"
 	app.errorResponse(w, r, http.StatusUnauthorized, message)
+}
+
+func (app *application) duplicateProfiledResponse(w http.ResponseWriter, r *http.Request) {
+	message := "cannot have more than one profile picture"
+	app.errorResponse(w, r, http.StatusUnprocessableEntity, message)
 }

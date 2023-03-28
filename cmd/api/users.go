@@ -61,6 +61,19 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	app.background(func() {
+		err = app.models.UsersProfile.InsertProfilePic(user.ID)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrDuplicateProfile):
+				app.duplicateProfiledResponse(w, r)
+			default:
+				app.serverErrorResponse(w, r, err)
+			}
+			return
+		}
+	})
+
 	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, data.ScopeActivation, r)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
