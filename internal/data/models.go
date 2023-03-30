@@ -42,6 +42,8 @@ type Models struct {
 		Insert(profile *UserProfile) error
 		Update(profile *UserProfile) error
 		InsertProfilePic(userID int64) error
+		Get(userID int64) (*UserProfile, error)
+		DeletOldPicture(imagePath string) error
 	}
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"image/jpeg"
 	"io"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/IfedayoAwe/greenlight/internal/data"
 	"github.com/IfedayoAwe/greenlight/internal/validator"
+	"github.com/julienschmidt/httprouter"
 )
 
 func (app *application) userProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -73,8 +75,26 @@ func (app *application) userProfileHandler(w http.ResponseWriter, r *http.Reques
 		app.serverErrorResponse(w, r, err)
 	}
 
-	userProfile := &data.UserProfile{
-		ImagePath: filePath,
+	userProfile, err := app.models.UsersProfile.Get(user.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.models.UsersProfile.DeletOldPicture(userProfile.ImagePath)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+	newFilePath := filepath.Join("profile", fileName)
+
+	userProfile = &data.UserProfile{
+		ImagePath: newFilePath,
 		UserID:    user.ID,
 	}
 
@@ -84,9 +104,50 @@ func (app *application) userProfileHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"message": "profile picture sucessfully updated"}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": newFilePath}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
 
+}
+
+func (app *application) getUserProfileHandler(w http.ResponseWriter, r *http.Request) {
+	user := app.contextGetUser(r)
+
+	userProfile, err := app.models.UsersProfile.Get(user.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	userProfiledetails := struct {
+		ID        int64
+		CreatedAt time.Time
+		Name      string
+		Email     string
+		ImagePath string
+	}{
+		ID:        user.ID,
+		CreatedAt: user.CreatedAt,
+		Name:      user.Name,
+		Email:     user.Email,
+		ImagePath: userProfile.ImagePath,
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"movie": userProfiledetails}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+}
+
+func (app *application) showProfilePictureHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	filePath := ps.ByName("filepath")
+	path := filepath.Join("./images/profile", filePath)
+	http.ServeFile(w, r, filepath.FromSlash(filepath.Clean(path)))
 }

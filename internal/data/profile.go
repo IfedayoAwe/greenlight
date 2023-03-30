@@ -69,6 +69,27 @@ func ValidateProfilePicture(v *validator.Validator, fileHeaderSize int64, ext st
 	return img, nil
 }
 
+func copyDefaultImage(destPath string) error {
+	srcPath := "images/Default.jpg"
+
+	srcFile, err := os.Open(srcPath)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	srcData, err := io.ReadAll(srcFile)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(destPath, srcData, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type ProfileModel struct {
 	DB *sql.DB
 }
@@ -98,27 +119,6 @@ func (p ProfileModel) Insert(profile *UserProfile) error {
 	}
 	return nil
 
-}
-
-func copyDefaultImage(destPath string) error {
-	srcPath := "images/Default.jpg"
-
-	srcFile, err := os.Open(srcPath)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
-
-	srcData, err := io.ReadAll(srcFile)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(destPath, srcData, 0644)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (p ProfileModel) InsertProfilePic(userID int64) error {
@@ -154,4 +154,39 @@ func (p ProfileModel) Update(profile *UserProfile) error {
 
 	_, err := p.DB.ExecContext(ctx, query, args...)
 	return err
+}
+
+func (p ProfileModel) Get(userID int64) (*UserProfile, error) {
+	query := `
+	SELECT image_path
+	FROM users_profile
+	WHERE user_id = $1`
+
+	var userProfile UserProfile
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := p.DB.QueryRowContext(ctx, query, userID).Scan(
+		&userProfile.ImagePath,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &userProfile, nil
+}
+
+func (p ProfileModel) DeletOldPicture(imagePath string) error {
+	oldPath := filepath.Join("images/", imagePath)
+	err := os.Remove(oldPath)
+	if err != nil {
+		return err
+	}
+	return nil
 }

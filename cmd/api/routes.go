@@ -19,16 +19,24 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.requirePermission("movies:write", app.deleteMovieHandler))
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
-	router.HandlerFunc(http.MethodPut, "/v1/users/password", app.resetUserPasswordHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
-	router.HandlerFunc(http.MethodPost, "/v1/tokens/activation", app.createActivationTokenHandler)
-	router.HandlerFunc(http.MethodPost, "/v1/tokens/password-reset", app.createPasswordResetTokenHandler)
 	router.HandlerFunc(http.MethodPut, "/v1/users/change-password", app.requireActivatedUser(app.changePasswordHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/tokens/password", app.createPasswordResetTokenHandler)
+	router.HandlerFunc(http.MethodPut, "/v1/users/password", app.resetUserPasswordHandler)
+	router.HandlerFunc(http.MethodPost, "/v1/tokens/activation", app.createActivationTokenHandler)
 	router.HandlerFunc(http.MethodPatch, "/v1/users/update-details", app.requireActivatedUser(app.updateUserDetailsHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/users/logout", app.requireActivatedUser(app.userLogoutHandler))
 	router.HandlerFunc(http.MethodPut, "/v1/users/profile", app.requireActivatedUser(app.userProfileHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/user/profile", app.requireActivatedUser(app.getUserProfileHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/users/delete", app.requireActivatedUser(app.deleteUserAccountHandler))
 	router.HandlerFunc(http.MethodPost, "/v1/users/movie-permission", app.requireAdmin(app.addMovieWritePermissionForUser))
+
+	handler := http.StripPrefix("/profile", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ps := httprouter.ParamsFromContext(r.Context())
+		app.showProfilePictureHandler(w, r, ps)
+	}))
+	router.HandlerFunc(http.MethodGet, "/profile/:filepath", app.requireActivatedUser(handler.ServeHTTP))
+
 	router.Handler(http.MethodGet, "/debug/vars", expvar.Handler())
 	return app.metrics(app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router)))))
 }
