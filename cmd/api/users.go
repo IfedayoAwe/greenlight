@@ -359,6 +359,23 @@ func (app *application) deleteUserAccountHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
+	userProfile, err := app.models.UsersProfile.Get(user.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.models.UsersProfile.DeletOldPicture(userProfile.ImagePath)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	err = app.writeJSON(w, http.StatusOK, envelope{"message": "user account successfully deleted"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

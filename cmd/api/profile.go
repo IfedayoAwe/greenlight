@@ -67,12 +67,14 @@ func (app *application) userProfileHandler(w http.ResponseWriter, r *http.Reques
 	destFile, err := os.Create(filePath)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+		return
 	}
 	defer destFile.Close()
 
 	err = jpeg.Encode(destFile, img, &jpeg.Options{Quality: 90})
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+		return
 	}
 
 	userProfile, err := app.models.UsersProfile.Get(user.ID)
@@ -89,6 +91,7 @@ func (app *application) userProfileHandler(w http.ResponseWriter, r *http.Reques
 	err = app.models.UsersProfile.DeletOldPicture(userProfile.ImagePath)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+		return
 	}
 
 	newFilePath := filepath.Join("profile", fileName)
