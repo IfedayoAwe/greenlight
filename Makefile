@@ -54,7 +54,7 @@ migratedown:
 .PHONY: run
 run:
 	@echo 'starting greenlight application'
-	@go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN}
+	@go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN} -metrics-enabled=true
 
 ## docker/compose/up: start containers in greenlight.yaml file
 .PHONY: docker/compose/up

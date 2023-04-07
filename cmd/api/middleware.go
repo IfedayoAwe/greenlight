@@ -195,32 +195,39 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 }
 
 func (app *application) metrics(next http.Handler) http.Handler {
-	totalRequestsReceived := expvar.NewInt("total_requests_received")
-	totalResponsesSent := expvar.NewInt("total_responses_sent")
-	totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_μs")
-	totalProcessingTimeMicrosecondsByMetrics := expvar.NewInt("total_processing_metrics_time_μs")
-	totalResponsesSentByStatus := expvar.NewMap("total_responses_sent_by_status")
+	if app.config.metrics.enabled {
+		totalRequestsReceived := expvar.NewInt("total_requests_received")
+		totalResponsesSent := expvar.NewInt("total_responses_sent")
+		totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_μs")
+		totalProcessingTimeMicrosecondsByMetrics := expvar.NewInt("total_processing_metrics_time_μs")
+		totalResponsesSentByStatus := expvar.NewMap("total_responses_sent_by_status")
+
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			start := time.Now()
+			totalRequestsReceived.Add(1)
+			// Call the httpsnoop.CaptureMetrics() function, passing in the next handler in
+			// the chain along with the existing http.ResponseWriter and http.Request. This
+			// returns the metrics struct.
+			metrics := httpsnoop.CaptureMetrics(next, w, r)
+
+			totalResponsesSent.Add(1)
+			// Calculate the number of microseconds since we began to process the request,
+			// then increment the total processing time by this amount.
+			duration := time.Since(start).Microseconds()
+			totalProcessingTimeMicroseconds.Add(duration)
+
+			// By metrics
+			totalProcessingTimeMicrosecondsByMetrics.Add(metrics.Duration.Microseconds())
+
+			// Use the Add() method to increment the count for the given status code by 1.
+			// Note that the expvar map is string-keyed, so we need to use the strconv.Itoa()
+			// function to convert the status code (which is an integer) to a string.
+			totalResponsesSentByStatus.Add(strconv.Itoa(metrics.Code), 1)
+		})
+	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		totalRequestsReceived.Add(1)
-		// Call the httpsnoop.CaptureMetrics() function, passing in the next handler in
-		// the chain along with the existing http.ResponseWriter and http.Request. This
-		// returns the metrics struct.
-		metrics := httpsnoop.CaptureMetrics(next, w, r)
-
-		totalResponsesSent.Add(1)
-		// Calculate the number of microseconds since we began to process the request,
-		// then increment the total processing time by this amount.
-		duration := time.Since(start).Microseconds()
-		totalProcessingTimeMicroseconds.Add(duration)
-
-		// By metrics
-		totalProcessingTimeMicrosecondsByMetrics.Add(metrics.Duration.Microseconds())
-
-		// Use the Add() method to increment the count for the given status code by 1.
-		// Note that the expvar map is string-keyed, so we need to use the strconv.Itoa()
-		// function to convert the status code (which is an integer) to a string.
-		totalResponsesSentByStatus.Add(strconv.Itoa(metrics.Code), 1)
+		next.ServeHTTP(w, r)
 	})
+
 }

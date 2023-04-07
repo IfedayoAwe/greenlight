@@ -1,12 +1,5 @@
 package main
 
-// import (
-// 	"bytes"
-// 	"net/http"
-// 	"net/url"
-// 	"testing"
-// )
-
 // func TestShowMovies(t *testing.T) {
 // 	app := newTestApplication(t)
 // 	ts := newTestServer(t, app.routes())

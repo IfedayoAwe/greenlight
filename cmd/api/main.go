@@ -40,6 +40,9 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+	metrics struct {
+		enabled bool
+	}
 	smtp struct {
 		host     string
 		port     int
@@ -79,6 +82,7 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+	flag.BoolVar(&cfg.metrics.enabled, "metrics-enabled", false, "Enable rate limiter")
 	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
 	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP port")
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "8502b6a9bc7a9b", "SMTP username")
