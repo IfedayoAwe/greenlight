@@ -20,6 +20,8 @@ var mockMovie = &data.Movie{
 type MockMovieModel struct{}
 
 func (m MockMovieModel) Insert(movie *data.Movie) error {
+	movie.Version = 1
+	movie.ID = 1
 	return nil
 }
 
