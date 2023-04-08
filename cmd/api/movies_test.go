@@ -1,48 +1,51 @@
 package main
 
-// func TestShowMovies(t *testing.T) {
-// 	app := newTestApplication(t)
-// 	ts := newTestServer(t, app.routes())
-// 	defer ts.Close()
+import (
+	"bytes"
+	"net/http"
+	"testing"
+)
 
-// 	t.Run("Unauthenticated", func(t *testing.T) {
-// 		code, header, _ := ts.get(t, "/v1/movies/1")
-// 		contentType := header.Get("Content-Type")
-// 		if contentType != "application/json" {
-// 			t.Errorf("want %q; got %q", "application/json", contentType)
-// 		}
+func TestShowMovies(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
 
-// 		if code != http.StatusUnauthorized {
-// 			t.Errorf("want %d; got %d", http.StatusUnauthorized, code)
-// 		}
-// 	})
+	tests := []struct {
+		name     string
+		urlPath  string
+		wantCode int
+		wantBody []byte
+		token    string
+	}{
+		{"Unauthenticated", "/v1/movies/1", http.StatusUnauthorized, nil, ""},
+		{"Authenticated", "/v1/movies/1", http.StatusOK, []byte("Test Movie"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI"},
+		{"UnActivated", "/v1/movies/1", http.StatusForbidden, nil, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRJ"},
+	}
 
-// 	t.Run("Authenticated", func(t *testing.T) {
-// 		// Authenticate the user...
-// 		code, header, _ := ts.get(t, "/v1/tokens/authentication")
-// 		contentType := header.Get("Content-Type")
-// 		if contentType != "application/json" {
-// 			t.Errorf("want %q; got %q", "application/json", contentType)
-// 		}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 
-// 		if code != http.StatusCreated {
-// 			t.Errorf("want %d; got %d", http.StatusUnauthorized, code)
-// 		}
+			req, err := http.NewRequest(http.MethodGet, ts.URL+tt.urlPath, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-// 		form := url.Values{}
-// 		form.Add("email", "olalekanawe99@gmail.com")
-// 		form.Add("password", "")
-// 		ts.postForm(t, "/user/login", form)
-// 		// Then check that the authenticated user is shown the create snippet form.
-// 		code, _, body := ts.get(t, "/snippet/create")
-// 		if code != 200 {
-// 			t.Errorf("want %d; got %d", 200, code)
-// 		}
+			req.Header.Set("Authorization", tt.token)
 
-// 		formTag := "<form action='/snippet/create' method='POST'>"
-// 		if !bytes.Contains(body, []byte(formTag)) {
-// 			t.Errorf("want body %s to contain %q", body, formTag)
-// 		}
-// 	})
+			code, header, body := ts.do(t, req)
+			contentType := header.Get("Content-Type")
+			if contentType != "application/json" {
+				t.Errorf("want %q; got %q", "application/json", contentType)
+			}
 
-// }
+			if code != tt.wantCode {
+				t.Errorf("want %d; got %d", tt.wantCode, code)
+			}
+			if !bytes.Contains(body, tt.wantBody) {
+				t.Errorf("want body to contain %q", tt.wantBody)
+			}
+		})
+	}
+
+}

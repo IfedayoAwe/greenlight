@@ -10,7 +10,7 @@ var mockMovie = &data.Movie{
 	ID:        1,
 	UserID:    1,
 	CreatedAt: time.Now(),
-	Title:     "Test",
+	Title:     "Test Movie",
 	Year:      2003,
 	Runtime:   2000,
 	Genres:    []string{"Comedy", "Drama"},

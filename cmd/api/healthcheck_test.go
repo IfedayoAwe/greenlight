@@ -19,7 +19,12 @@ func TestHealthcheckHandler(t *testing.T) {
 		},
 	}
 
-	code, header, body := ts.get(t, "/v1/healthcheck")
+	req, err := http.NewRequest(http.MethodGet, ts.URL+"/v1/healthcheck", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	code, header, body := ts.do(t, req)
 
 	var decVar envelope
 
