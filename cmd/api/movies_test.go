@@ -191,3 +191,49 @@ func TestUpdateMovie(t *testing.T) {
 	}
 
 }
+
+func TestDeleteMovie(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name     string
+		wantCode int
+		wantBody []byte
+		token    string
+		urlPath  string
+	}{
+		{"Authenticated", http.StatusOK, []byte("movie successfully deleted"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
+		{"NotFound", http.StatusNotFound, []byte("the requested resource could not be found"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/2"},
+		{"Authenticated", http.StatusNotFound, []byte("the requested resource could not be found"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/foo"},
+		{"NotPermitted", http.StatusForbidden, []byte("your user account is not permitted to access this resource"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRM", "/v1/movies/1"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			req, err := http.NewRequest(http.MethodDelete, ts.URL+tt.urlPath, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Set("Authorization", tt.token)
+			req.Header.Add("Content-Type", "application/json")
+
+			code, header, body := ts.do(t, req)
+			if contentType := header.Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("want %q; got %q", "application/json", contentType)
+			}
+
+			if code != tt.wantCode {
+				t.Errorf("want %d; got %d", http.StatusOK, code)
+			}
+
+			if !bytes.Contains(body, tt.wantBody) {
+				t.Errorf("want body to contain %q", tt.wantBody)
+			}
+
+		})
+	}
+}
