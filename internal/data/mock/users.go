@@ -36,6 +36,16 @@ var MockUser3 = &data.User{
 	Version:   1,
 }
 
+var MockUser4 = &data.User{
+	ID:        4,
+	Name:      "Mummy Awe",
+	Email:     "mummy@gmail.com",
+	CreatedAt: time.Now(),
+	Activated: true,
+	Admin:     false,
+	Version:   1,
+}
+
 type MockUserModel struct{}
 
 func (m MockUserModel) Insert(user *data.User) error {
@@ -50,6 +60,8 @@ func (m MockUserModel) GetByEmail(email string) (*data.User, error) {
 		return MockUser2, nil
 	case "vicky@gmail.com":
 		return MockUser3, nil
+	case "mummy@gmail.com":
+		return MockUser4, nil
 	default:
 		return nil, data.ErrInvalidCredentials
 	}
@@ -67,6 +79,8 @@ func (m MockUserModel) GetForToken(tokenScope, tokenPlaintext string) (*data.Use
 		return MockUser2, nil
 	case "HTE34GKUHNDUSJ3QRUT6IKWKRL":
 		return MockUser3, nil
+	case "HTE34GKUHNDUSJ3QRUT6IKWKRM":
+		return MockUser4, nil
 	default:
 		return nil, data.ErrRecordNotFound
 	}

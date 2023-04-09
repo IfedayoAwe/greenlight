@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"testing"
 )
 
@@ -21,6 +22,7 @@ func TestShowMovies(t *testing.T) {
 	}{
 		{"Unauthenticated", "/v1/movies/1", http.StatusUnauthorized, nil, ""},
 		{"Authenticated", "/v1/movies/1", http.StatusOK, []byte("Test Movie"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI"},
+		{"NotFound", "/v1/movies/2", http.StatusNotFound, nil, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI"},
 		{"UnActivated", "/v1/movies/1", http.StatusForbidden, nil, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRJ"},
 	}
 
@@ -119,6 +121,66 @@ func TestCreateMovie(t *testing.T) {
 
 			if code != tt.wantCode {
 				t.Errorf("want %d; got %d", tt.wantCode, code)
+			}
+
+			if !bytes.Contains(body, tt.wantBody) {
+				t.Errorf("want body to contain %q", tt.wantBody)
+			}
+
+		})
+	}
+
+}
+
+func TestUpdateMovie(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	movie1 := struct{ Title string }{"Movies Test 1"}
+	movie2 := struct{ Year int }{2005}
+	movie3 := struct{ Runtime string }{"230 mins"}
+	movie4 := struct{ Genres []string }{[]string{"Fantasy"}}
+
+	tests := []struct {
+		name     string
+		movie    interface{}
+		wantCode int
+		wantBody []byte
+		token    string
+		urlPath  string
+	}{
+		{"Title", movie1, http.StatusOK, []byte("Movies Test 1"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
+		{"Year", movie2, http.StatusOK, []byte(strconv.Itoa(2005)), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
+		{"Runtime", movie3, http.StatusOK, []byte("230 mins"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
+		{"Genres", movie4, http.StatusOK, []byte("Fantasy"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
+		{"NotExist", movie4, http.StatusNotFound, []byte("the requested resource could not be found"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/5"},
+		{"NotPermitted", movie1, http.StatusForbidden, []byte("your user account is not permitted to access this resource"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRM", "/v1/movies/1"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			payload, err := json.Marshal(tt.movie)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req, err := http.NewRequest(http.MethodPatch, ts.URL+tt.urlPath, bytes.NewReader(payload))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Set("Authorization", tt.token)
+			req.Header.Add("Content-Type", "application/json")
+
+			code, header, body := ts.do(t, req)
+			if contentType := header.Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("want %q; got %q", "application/json", contentType)
+			}
+
+			if code != tt.wantCode {
+				t.Errorf("want %d; got %d", http.StatusOK, code)
 			}
 
 			if !bytes.Contains(body, tt.wantBody) {

@@ -9,7 +9,7 @@ type MockPermissionModel struct{}
 
 func (m MockPermissionModel) GetAllForUser(userID int64) (data.Permissions, error) {
 	switch userID {
-	case 1:
+	case 1, 4:
 		return *mockPermissions1, nil
 	default:
 		return *mockPermissions2, nil
