@@ -22,6 +22,7 @@ func TestShowMovies(t *testing.T) {
 	}{
 		{"Unauthenticated", "/v1/movies/1", http.StatusUnauthorized, nil, ""},
 		{"Authenticated", "/v1/movies/1", http.StatusOK, []byte("Test Movie"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI"},
+		{"NotFoundFoo", "/v1/movies/foo", http.StatusNotFound, nil, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI"},
 		{"NotFound", "/v1/movies/2", http.StatusNotFound, nil, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI"},
 		{"UnActivated", "/v1/movies/1", http.StatusForbidden, nil, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRJ"},
 	}
@@ -141,6 +142,7 @@ func TestUpdateMovie(t *testing.T) {
 	movie2 := struct{ Year int }{2005}
 	movie3 := struct{ Runtime string }{"230 mins"}
 	movie4 := struct{ Genres []string }{[]string{"Fantasy"}}
+	movie5 := struct{ Year int }{20}
 
 	tests := []struct {
 		name     string
@@ -154,7 +156,9 @@ func TestUpdateMovie(t *testing.T) {
 		{"Year", movie2, http.StatusOK, []byte(strconv.Itoa(2005)), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
 		{"Runtime", movie3, http.StatusOK, []byte("230 mins"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
 		{"Genres", movie4, http.StatusOK, []byte("Fantasy"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
+		{"FailedValidation", movie5, http.StatusUnprocessableEntity, []byte("must be greater than 1888"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
 		{"NotExist", movie4, http.StatusNotFound, []byte("the requested resource could not be found"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/5"},
+		{"NotExistFoo", movie4, http.StatusNotFound, []byte("the requested resource could not be found"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/foo"},
 		{"NotPermitted", movie1, http.StatusForbidden, []byte("your user account is not permitted to access this resource"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRM", "/v1/movies/1"},
 	}
 
@@ -206,7 +210,7 @@ func TestDeleteMovie(t *testing.T) {
 	}{
 		{"Authenticated", http.StatusOK, []byte("movie successfully deleted"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/1"},
 		{"NotFound", http.StatusNotFound, []byte("the requested resource could not be found"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/2"},
-		{"Authenticated", http.StatusNotFound, []byte("the requested resource could not be found"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/foo"},
+		{"NotFoundFoo", http.StatusNotFound, []byte("the requested resource could not be found"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies/foo"},
 		{"NotPermitted", http.StatusForbidden, []byte("your user account is not permitted to access this resource"), "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRM", "/v1/movies/1"},
 	}
 
@@ -236,4 +240,50 @@ func TestDeleteMovie(t *testing.T) {
 
 		})
 	}
+}
+
+func TestListMovie(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name     string
+		wantCode int
+		token    string
+		urlPath  string
+	}{
+		{"AllMovies", http.StatusOK, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies"},
+		{"FilterMovies", http.StatusOK, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies?title=testmovie&genres=comedy,action&page=1&page_size=5&sort=-year"},
+		{"SortYear", http.StatusOK, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies?sort=year"},
+		{"SortIDDesc", http.StatusOK, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies?sort=-id"},
+		{"SortID", http.StatusOK, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies?sort=id"},
+		{"SortTitle", http.StatusOK, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies?sort=title"},
+		{"SortTitleDesc", http.StatusOK, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies?sort=-title"},
+		{"SortRuntime", http.StatusOK, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies?sort=runtime"},
+		{"SortRuntimeDesc", http.StatusOK, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies?sort=-runtime"},
+		{"FailedValidation", http.StatusUnprocessableEntity, "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", "/v1/movies?sort=foo"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := http.NewRequest(http.MethodGet, ts.URL+tt.urlPath, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Set("Authorization", tt.token)
+
+			code, header, _ := ts.do(t, req)
+			if contentType := header.Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("want %q; got %q", "application/json", contentType)
+			}
+
+			if code != tt.wantCode {
+				t.Errorf("want %d; got %d", http.StatusOK, code)
+			}
+
+		})
+	}
+
 }
