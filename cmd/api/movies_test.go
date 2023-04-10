@@ -184,7 +184,7 @@ func TestUpdateMovie(t *testing.T) {
 			}
 
 			if code != tt.wantCode {
-				t.Errorf("want %d; got %d", http.StatusOK, code)
+				t.Errorf("want %d; got %d", tt.wantCode, code)
 			}
 
 			if !bytes.Contains(body, tt.wantBody) {
@@ -231,7 +231,7 @@ func TestDeleteMovie(t *testing.T) {
 			}
 
 			if code != tt.wantCode {
-				t.Errorf("want %d; got %d", http.StatusOK, code)
+				t.Errorf("want %d; got %d", tt.wantCode, code)
 			}
 
 			if !bytes.Contains(body, tt.wantBody) {
@@ -280,7 +280,7 @@ func TestListMovie(t *testing.T) {
 			}
 
 			if code != tt.wantCode {
-				t.Errorf("want %d; got %d", http.StatusOK, code)
+				t.Errorf("want %d; got %d", tt.wantCode, code)
 			}
 
 		})

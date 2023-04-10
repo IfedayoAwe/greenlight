@@ -18,5 +18,6 @@ func (m MockTokenModel) DeleteAllForUser(scope string, userID int64, userIP *str
 }
 
 func (m MockTokenModel) New(userID int64, ttl time.Duration, scope string, r *http.Request) (*data.Token, error) {
-	return nil, nil
+	token := data.Token{}
+	return &token, nil
 }

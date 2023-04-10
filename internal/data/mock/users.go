@@ -49,7 +49,12 @@ var MockUser4 = &data.User{
 type MockUserModel struct{}
 
 func (m MockUserModel) Insert(user *data.User) error {
-	return nil
+	switch user.Email {
+	case "olalekanawe99@gmail.com", "ayo@gmail.com", "vicky@gmail.com", "mummy@gmail.com":
+		return data.ErrDuplicateEmail
+	default:
+		return nil
+	}
 }
 
 func (m MockUserModel) GetByEmail(email string) (*data.User, error) {
