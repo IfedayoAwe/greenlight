@@ -115,7 +115,7 @@ func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *h
 			"activationToken": token.Plaintext,
 		}
 
-		err = app.mailer.Send(user.Email, "token_activation.html", data, app.config.smtp.enabled)
+		err = app.mailer.Send(user.Email, "token_activation.html", data)
 		if err != nil {
 			app.logger.PrintError(err, nil)
 		}
@@ -174,7 +174,7 @@ func (app *application) createPasswordResetTokenHandler(w http.ResponseWriter, r
 			"passwordResetToken": token.Plaintext,
 		}
 
-		err = app.mailer.Send(user.Email, "token_password_reset.html", data, app.config.smtp.enabled)
+		err = app.mailer.Send(user.Email, "token_password_reset.html", data)
 		if err != nil {
 			app.logger.PrintError(err, nil)
 		}

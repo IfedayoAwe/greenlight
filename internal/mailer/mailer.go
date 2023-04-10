@@ -13,21 +13,23 @@ import (
 var templateFS embed.FS
 
 type Mailer struct {
-	dialer *mail.Dialer
-	sender string
+	dialer      *mail.Dialer
+	sender      string
+	smtpEnabled bool
 }
 
-func New(host string, port int, username, password, sender string) Mailer {
+func New(host string, port int, username, password, sender string, smtpEnabled bool) Mailer {
 	dialer := mail.NewDialer(host, port, username, password)
 	dialer.Timeout = 5 * time.Second
 	return Mailer{
-		dialer: dialer,
-		sender: sender,
+		dialer:      dialer,
+		sender:      sender,
+		smtpEnabled: smtpEnabled,
 	}
 }
 
-func (m Mailer) Send(recipient, templateFile string, data interface{}, smtpEnable bool) error {
-	if smtpEnable {
+func (m Mailer) Send(recipient, templateFile string, data interface{}) error {
+	if m.smtpEnabled {
 		tmpl, err := template.New("email").ParseFS(templateFS, "templates/"+templateFile)
 		if err != nil {
 			return err

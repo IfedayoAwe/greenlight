@@ -32,7 +32,7 @@ func newTestApplication(t *testing.T) *application {
 		config: testCfg,
 		logger: jsonlog.New(io.Discard, jsonlog.LevelInfo),
 		models: mock.NewMockModels(),
-		mailer: mailer.New(testCfg.smtp.host, testCfg.smtp.port, testCfg.smtp.username, testCfg.smtp.password, testCfg.smtp.sender),
+		mailer: mailer.New(testCfg.smtp.host, testCfg.smtp.port, testCfg.smtp.username, testCfg.smtp.password, testCfg.smtp.sender, testCfg.smtp.enabled),
 	}
 }
 

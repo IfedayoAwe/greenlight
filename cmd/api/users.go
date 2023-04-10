@@ -87,7 +87,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	app.background(func() {
-		err = app.mailer.Send(user.Email, "user_welcome.html", data, app.config.smtp.enabled)
+		err = app.mailer.Send(user.Email, "user_welcome.html", data)
 		if err != nil {
 			app.logger.PrintError(err, nil)
 		}
