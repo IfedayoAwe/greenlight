@@ -49,6 +49,7 @@ type config struct {
 		username string
 		password string
 		sender   string
+		enabled  bool
 	}
 	cors struct {
 		trustedOrigins []string
@@ -82,12 +83,13 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
-	flag.BoolVar(&cfg.metrics.enabled, "metrics-enabled", false, "Enable rate limiter")
+	flag.BoolVar(&cfg.metrics.enabled, "metrics-enabled", true, "Enable metrics")
 	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
 	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP port")
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "8502b6a9bc7a9b", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "6d0db8180009fd", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <olalekanawe99@gmail.com>", "SMTP sender")
+	flag.BoolVar(&cfg.smtp.enabled, "smtp-enabled", true, "Enable SMTP")
 	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
 		cfg.cors.trustedOrigins = strings.Fields(val)
 		return nil

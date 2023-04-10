@@ -24,6 +24,8 @@ func newTestApplication(t *testing.T) *application {
 	testCfg.smtp.username = "8502b6a9bc7a9b"
 	testCfg.smtp.password = "6d0db8180009fd"
 	testCfg.smtp.sender = "Greenlight <olalekanawe99@gmail.com>"
+	testCfg.smtp.enabled = false
+	testCfg.metrics.enabled = false
 	testCfg.cors.trustedOrigins = []string{"*"}
 
 	return &application{
