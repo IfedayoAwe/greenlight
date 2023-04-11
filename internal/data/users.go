@@ -12,9 +12,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type password struct {
-	plaintext *string
-	hash      []byte
+type Password struct {
+	Plaintext *string
+	Hash      []byte
 }
 
 type User struct {
@@ -22,7 +22,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
-	Password  password  `json:"-"`
+	Password  Password  `json:"-"`
 	Activated bool      `json:"activated"`
 	Admin     bool      `json:"admin"`
 	Version   int       `json:"-"`
@@ -34,18 +34,18 @@ func (u *User) IsAnonymous() bool {
 	return u == AnonymousUser
 }
 
-func (p *password) Set(plaintextPassword string) error {
+func (p *Password) Set(plaintextPassword string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(plaintextPassword), 12)
 	if err != nil {
 		return err
 	}
-	p.plaintext = &plaintextPassword
-	p.hash = hash
+	p.Plaintext = &plaintextPassword
+	p.Hash = hash
 	return nil
 }
 
-func (p *password) Matches(plaintextPassword string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword(p.hash, []byte(plaintextPassword))
+func (p *Password) Matches(plaintextPassword string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword(p.Hash, []byte(plaintextPassword))
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
@@ -79,10 +79,10 @@ func ValidateUser(v *validator.Validator, user *User) {
 	v.Check(user.Name != "", "name", "must be provided")
 	v.Check(len(user.Name) <= 50, "name", "must not be more than 50 bytes long")
 	ValidateEmail(v, user.Email)
-	if user.Password.plaintext != nil {
-		ValidatePasswordPlaintext(v, *user.Password.plaintext)
+	if user.Password.Plaintext != nil {
+		ValidatePasswordPlaintext(v, *user.Password.Plaintext)
 	}
-	if user.Password.hash == nil {
+	if user.Password.Hash == nil {
 		panic("missing password hash for user")
 	}
 }
@@ -100,7 +100,7 @@ func (m UserModel) Insert(user *User) error {
 	INSERT INTO users (name, email, password_hash, activated, admin)
 	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id, created_at, version`
-	args := []interface{}{user.Name, user.Email, user.Password.hash, user.Activated, user.Admin}
+	args := []interface{}{user.Name, user.Email, user.Password.Hash, user.Activated, user.Admin}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -129,7 +129,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 		&user.CreatedAt,
 		&user.Name,
 		&user.Email,
-		&user.Password.hash,
+		&user.Password.Hash,
 		&user.Activated,
 		&user.Admin,
 		&user.Version,
@@ -154,7 +154,7 @@ func (m UserModel) Update(user *User) error {
 	args := []interface{}{
 		user.Name,
 		user.Email,
-		user.Password.hash,
+		user.Password.Hash,
 		user.Activated,
 		user.Admin,
 		user.ID,
@@ -200,7 +200,7 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 		&user.CreatedAt,
 		&user.Name,
 		&user.Email,
-		&user.Password.hash,
+		&user.Password.Hash,
 		&user.Activated,
 		&user.Admin,
 		&user.Version,

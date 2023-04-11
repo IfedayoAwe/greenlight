@@ -4,47 +4,57 @@ import (
 	"time"
 
 	"github.com/IfedayoAwe/greenlight/internal/data"
+	"golang.org/x/crypto/bcrypt"
 )
 
-var MockUser = &data.User{
-	ID:        1,
-	Name:      "Olalekan Ifedayo Awe",
-	Email:     "olalekanawe99@gmail.com",
-	CreatedAt: time.Now(),
-	Activated: true,
-	Admin:     true,
-	Version:   1,
+func pass(password string) []byte {
+	pass, _ := bcrypt.GenerateFromPassword([]byte(password), 12)
+	return pass
 }
 
-var MockUser2 = &data.User{
-	ID:        2,
-	Name:      "Ayo Awe",
-	Email:     "ayo@gmail.com",
-	CreatedAt: time.Now(),
-	Activated: false,
-	Admin:     false,
-	Version:   1,
-}
+var (
+	MockUser = &data.User{
+		ID:        1,
+		Name:      "Olalekan Ifedayo Awe",
+		Email:     "olalekanawe99@gmail.com",
+		CreatedAt: time.Now(),
+		Activated: true,
+		Admin:     true,
+		Version:   1,
+		Password: data.Password{
+			Hash: pass("1234567890"),
+		},
+	}
+	MockUser2 = &data.User{
+		ID:        2,
+		Name:      "Ayo Awe",
+		Email:     "ayo@gmail.com",
+		CreatedAt: time.Now(),
+		Activated: false,
+		Admin:     false,
+		Version:   1,
+	}
+	MockUser3 = &data.User{
+		ID:        3,
+		Name:      "Vicky Awe",
+		Email:     "vicky@gmail.com",
+		CreatedAt: time.Now(),
+		Activated: true,
+		Admin:     false,
+		Version:   1,
+	}
+	MockUser4 = &data.User{
+		ID:        4,
+		Name:      "Mummy Awe",
+		Email:     "mummy@gmail.com",
+		CreatedAt: time.Now(),
+		Activated: true,
+		Admin:     false,
+		Version:   1,
+	}
+)
 
-var MockUser3 = &data.User{
-	ID:        3,
-	Name:      "Vicky Awe",
-	Email:     "vicky@gmail.com",
-	CreatedAt: time.Now(),
-	Activated: true,
-	Admin:     false,
-	Version:   1,
-}
-
-var MockUser4 = &data.User{
-	ID:        4,
-	Name:      "Mummy Awe",
-	Email:     "mummy@gmail.com",
-	CreatedAt: time.Now(),
-	Activated: true,
-	Admin:     false,
-	Version:   1,
-}
+var ()
 
 type MockUserModel struct{}
 
