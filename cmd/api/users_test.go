@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 )
@@ -209,4 +210,64 @@ func TestChangePassword(t *testing.T) {
 
 		})
 	}
+}
+
+func TestResetUserPassword(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name     string
+		token    string
+		wantCode int
+		wantBody []byte
+		password string
+	}{
+		{"Sucessful", "HTE34GKUHNDUSJ3QRUT6IKWKRI", http.StatusOK, []byte("your password was successfully reset"), "pa5555word"},
+		{"EmptyToken", "", http.StatusUnprocessableEntity, []byte("must be provided"), "pa5555word"},
+		{"BadToken", "NDUSJ3QRUT6IKWK", http.StatusUnprocessableEntity, []byte("must be 26 bytes long"), "pa5555word"},
+		{"InvalidToken", "HTE34GKUHNDUSJ3QRUT6IKWKRX", http.StatusUnprocessableEntity, []byte("invalid or expired password reset token"), "pa5555word"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			password := struct {
+				Password string
+				Token    string
+			}{
+				Password: tt.password,
+				Token:    tt.token,
+			}
+
+			payload, err := json.Marshal(password)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req, err := http.NewRequest(http.MethodPut, ts.URL+"/v1/users/password", bytes.NewReader(payload))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Add("Content-Type", "application/json")
+
+			code, header, body := ts.do(t, req)
+			fmt.Println(string(body))
+			if contentType := header.Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("want %q; got %q", "application/json", contentType)
+			}
+
+			if code != tt.wantCode {
+				t.Errorf("want %d; got %d", tt.wantCode, code)
+			}
+
+			if !bytes.Contains(body, tt.wantBody) {
+				t.Errorf("want body to contain %q", tt.wantBody)
+			}
+
+		})
+	}
+
 }
