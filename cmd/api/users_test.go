@@ -86,3 +86,60 @@ func TestRegisterUser(t *testing.T) {
 	}
 
 }
+
+func TestActivateUser(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	testToken := struct{ Token string }{"HTE34GKUHNDUSJ3QRUT6IKWKRJ"}
+	testToken2 := struct{ Token string }{"HTE34GKUHNDUSJ3QRUT6IKWKRG"}
+	testToken3 := struct{ Foo string }{"HTE34GKUHNDUSJ3QRUT6IKWKRJ"}
+	testToken4 := struct{ Token string }{"$#@USJ3QRUT6IKWKRG"}
+	testToken5 := struct{ Token string }{""}
+
+	tests := []struct {
+		name     string
+		token    interface{}
+		wantCode int
+		wantBody []byte
+	}{
+		{"ValidToken", testToken, http.StatusOK, []byte("ayo@gmail.com")},
+		{"InvalidToken", testToken2, http.StatusUnprocessableEntity, []byte("invalid or expired activation token")},
+		{"ShortToken", testToken4, http.StatusUnprocessableEntity, []byte("must be 26 bytes long")},
+		{"EmptyToken", testToken5, http.StatusUnprocessableEntity, []byte("must be provided")},
+		{"BadRequest", testToken3, http.StatusBadRequest, []byte("body contains unknown key")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			payload, err := json.Marshal(tt.token)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req, err := http.NewRequest(http.MethodPut, ts.URL+"/v1/users/activated", bytes.NewReader(payload))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Add("Content-Type", "application/json")
+
+			code, header, body := ts.do(t, req)
+			if contentType := header.Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("want %q; got %q", "application/json", contentType)
+			}
+
+			if code != tt.wantCode {
+				t.Errorf("want %d; got %d", tt.wantCode, code)
+			}
+
+			if !bytes.Contains(body, tt.wantBody) {
+				t.Errorf("want body to contain %q", tt.wantBody)
+			}
+
+		})
+	}
+
+}
