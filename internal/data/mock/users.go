@@ -78,7 +78,7 @@ func (m MockUserModel) GetByEmail(email string) (*data.User, error) {
 	case "mummy@gmail.com":
 		return MockUser4, nil
 	default:
-		return nil, data.ErrInvalidCredentials
+		return nil, data.ErrRecordNotFound
 	}
 }
 
