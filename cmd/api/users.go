@@ -348,17 +348,6 @@ func (app *application) userLogoutHandler(w http.ResponseWriter, r *http.Request
 func (app *application) deleteUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	user := app.contextGetUser(r)
 
-	err := app.models.Users.Delete(user.ID)
-	if err != nil {
-		switch {
-		case errors.Is(err, data.ErrRecordNotFound):
-			app.notFoundResponse(w, r)
-		default:
-			app.serverErrorResponse(w, r, err)
-		}
-		return
-	}
-
 	userProfile, err := app.models.UsersProfile.Get(user.ID)
 	if err != nil {
 		switch {
@@ -373,6 +362,17 @@ func (app *application) deleteUserAccountHandler(w http.ResponseWriter, r *http.
 	err = app.models.UsersProfile.DeletOldPicture(userProfile.ImagePath)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.models.Users.Delete(user.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 

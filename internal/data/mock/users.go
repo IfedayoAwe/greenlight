@@ -111,5 +111,10 @@ func (m MockUserModel) ChangePassword(id int64, newPassword string) error {
 }
 
 func (m MockUserModel) Delete(id int64) error {
-	return nil
+	switch id {
+	case 1:
+		return nil
+	default:
+		return data.ErrRecordNotFound
+	}
 }

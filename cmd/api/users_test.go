@@ -370,3 +370,46 @@ func TestUserLogout(t *testing.T) {
 	}
 
 }
+
+func TestDeleteUserAccount(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name     string
+		token    string
+		wantCode int
+		wantBody []byte
+	}{
+		{"Sucessful", "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", http.StatusOK, []byte("user account successfully deleted")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			req, err := http.NewRequest(http.MethodDelete, ts.URL+"/v1/users/delete", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Set("Authorization", tt.token)
+			req.Header.Add("Content-Type", "application/json")
+
+			code, header, body := ts.do(t, req)
+			if contentType := header.Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("want %q; got %q", "application/json", contentType)
+			}
+
+			if code != tt.wantCode {
+				t.Errorf("want %d; got %d", tt.wantCode, code)
+			}
+
+			if !bytes.Contains(body, tt.wantBody) {
+				t.Errorf("want body to contain %q", tt.wantBody)
+			}
+
+		})
+	}
+
+}
