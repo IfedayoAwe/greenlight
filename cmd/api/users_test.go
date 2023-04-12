@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 )
@@ -254,7 +253,107 @@ func TestResetUserPassword(t *testing.T) {
 			req.Header.Add("Content-Type", "application/json")
 
 			code, header, body := ts.do(t, req)
-			fmt.Println(string(body))
+			if contentType := header.Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("want %q; got %q", "application/json", contentType)
+			}
+
+			if code != tt.wantCode {
+				t.Errorf("want %d; got %d", tt.wantCode, code)
+			}
+
+			if !bytes.Contains(body, tt.wantBody) {
+				t.Errorf("want body to contain %q", tt.wantBody)
+			}
+
+		})
+	}
+
+}
+
+func TestUpdateUserDetails(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	user1 := struct{ Name string }{"Jerry"}
+	user2 := struct{ Email string }{"jerry@gmail.com"}
+	user3 := struct{ Foo string }{"jerry@gmail.com"}
+	user4 := struct{ Email string }{"foo@gmail.com"}
+	user5 := struct{ Name string }{""}
+
+	tests := []struct {
+		name     string
+		token    string
+		wantCode int
+		wantBody []byte
+		user     interface{}
+	}{
+		{"Name", "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", http.StatusOK, []byte("Jerry"), user1},
+		{"Email", "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", http.StatusOK, []byte("jerry@gmail.com"), user2},
+		{"Foo", "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", http.StatusBadRequest, []byte("body contains unknown key"), user3},
+		{"DuplicateEmail", "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", http.StatusUnprocessableEntity, []byte("a user with this email address already exists"), user4},
+		{"EmptyName", "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", http.StatusUnprocessableEntity, []byte("must be provided"), user5},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			payload, err := json.Marshal(tt.user)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req, err := http.NewRequest(http.MethodPatch, ts.URL+"/v1/users/update-details", bytes.NewReader(payload))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Set("Authorization", tt.token)
+			req.Header.Add("Content-Type", "application/json")
+
+			code, header, body := ts.do(t, req)
+			if contentType := header.Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("want %q; got %q", "application/json", contentType)
+			}
+
+			if code != tt.wantCode {
+				t.Errorf("want %d; got %d", tt.wantCode, code)
+			}
+
+			if !bytes.Contains(body, tt.wantBody) {
+				t.Errorf("want body to contain %q", tt.wantBody)
+			}
+
+		})
+	}
+}
+
+func TestUserLogout(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name     string
+		token    string
+		wantCode int
+		wantBody []byte
+	}{
+		{"Sucessful", "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI", http.StatusOK, []byte("user sucessfully logged out")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			req, err := http.NewRequest(http.MethodDelete, ts.URL+"/v1/users/logout", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Set("Authorization", tt.token)
+			req.Header.Add("Content-Type", "application/json")
+
+			code, header, body := ts.do(t, req)
 			if contentType := header.Get("Content-Type"); contentType != "application/json" {
 				t.Errorf("want %q; got %q", "application/json", contentType)
 			}

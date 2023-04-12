@@ -83,7 +83,12 @@ func (m MockUserModel) GetByEmail(email string) (*data.User, error) {
 }
 
 func (m MockUserModel) Update(user *data.User) error {
-	return nil
+	switch user.Email {
+	case "foo@gmail.com":
+		return data.ErrDuplicateEmail
+	default:
+		return nil
+	}
 }
 
 func (m MockUserModel) GetForToken(tokenScope, tokenPlaintext string) (*data.User, error) {
