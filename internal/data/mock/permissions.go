@@ -18,5 +18,10 @@ func (m MockPermissionModel) GetAllForUser(userID int64) (data.Permissions, erro
 }
 
 func (m MockPermissionModel) AddForUser(userID int64, codes ...string) error {
-	return nil
+	switch userID {
+	case 1, 4:
+		return data.ErrDuplicatePermission
+	default:
+		return nil
+	}
 }
