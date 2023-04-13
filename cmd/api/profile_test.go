@@ -60,3 +60,28 @@ func TestUserProfile(t *testing.T) {
 		}
 	})
 }
+
+func TestGetUserProfile(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	t.Run("Success", func(t *testing.T) {
+
+		req, err := http.NewRequest(http.MethodGet, ts.URL+"/v1/user/profile", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		req.Header.Set("Authorization", "Bearer HTE34GKUHNDUSJ3QRUT6IKWKRI")
+
+		code, _, body := ts.do(t, req)
+		if code != http.StatusOK {
+			t.Errorf("want %d; got %d", http.StatusOK, code)
+		}
+
+		if !bytes.Contains(body, []byte("olalekanawe99@gmail.com")) {
+			t.Errorf("want body to contain %q", []byte("olalekanawe99@gmail.com"))
+		}
+	})
+}
