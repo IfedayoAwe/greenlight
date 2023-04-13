@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/IfedayoAwe/greenlight/internal/data/mock"
@@ -26,11 +27,12 @@ func newTestApplication(t *testing.T) *application {
 	testCfg.smtp.sender = "Greenlight <olalekanawe99@gmail.com>"
 	testCfg.smtp.enabled = false
 	testCfg.metrics.enabled = false
+	testCfg.profile.enabled = false
 	testCfg.cors.trustedOrigins = []string{"*"}
 
 	return &application{
 		config: testCfg,
-		logger: jsonlog.New(io.Discard, jsonlog.LevelInfo),
+		logger: jsonlog.New(os.Stderr, jsonlog.LevelInfo),
 		models: mock.NewMockModels(),
 		mailer: mailer.New(testCfg.smtp.host, testCfg.smtp.port, testCfg.smtp.username, testCfg.smtp.password, testCfg.smtp.sender, testCfg.smtp.enabled),
 	}

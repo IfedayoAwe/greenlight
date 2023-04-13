@@ -64,17 +64,19 @@ func (app *application) userProfileHandler(w http.ResponseWriter, r *http.Reques
 	fileName := fmt.Sprintf("%d%d%s", user.ID, time.Now().UnixNano(), ext)
 	filePath := filepath.Join("images/profile", fileName)
 
-	destFile, err := os.Create(filePath)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
-	}
-	defer destFile.Close()
+	if app.config.profile.enabled {
+		destFile, err := os.Create(filePath)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+		defer destFile.Close()
 
-	err = jpeg.Encode(destFile, img, &jpeg.Options{Quality: 90})
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
+		err = jpeg.Encode(destFile, img, &jpeg.Options{Quality: 90})
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
 	}
 
 	userProfile, err := app.models.UsersProfile.Get(user.ID)
