@@ -74,6 +74,12 @@ migration:
 	@echo 'Creating migration files for ${name}...'
 	migrate create -seq -ext=.sql -dir=./migrations ${name}
 
+## tests: runs test code coverage
+.PHONY: tests
+tests:
+	@echo 'running tests cover'
+	go test ./cmd/api -cover
+
 # ==================================================================================== #
 # QUALITY CONTROL
 # ==================================================================================== #
@@ -116,4 +122,4 @@ build/api:
 	go build -ldflags=${linker_flags} -o=./bin/api ./cmd/api
 	GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/api ./cmd/api
 
-.PHONY: help startdb createdb dropdb migrateup migratedown confirm run docker/compose/up docker/compose/down migration vendor build/api
+.PHONY: help startdb createdb dropdb migrateup migratedown confirm run docker/compose/up docker/compose/down migration vendor build/api tests
