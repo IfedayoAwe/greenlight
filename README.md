@@ -59,7 +59,7 @@ The following targets are defined in the Makefile:
 
 ## API Documentation
 | Method |   URL Pattern              |  Action                                           |
--------------------------------------------------------------------------------------------
+|--------|----------------------------|---------------------------------------------------|
 | GET    | /v1/healthcheck            | Show application health and version information   |
 | GET    | /v1/movies                 | Show the details of all movies                    |
 | POST   | /v1/movies                 | Create a new movie                                |                                                           
