@@ -67,8 +67,11 @@ The following targets are defined in the Makefile:
 | PATCH  | /v1/movies/:id             | Update the details of a specific movie            |
 | DELETE | /v1/movies/:id             | Delete a specific movie                           |
 | POST   | /v1/users                  | Register a new user                               |
+| POST   | /v1/tokens/activation      | Generate a new user activation token              |
 | PUT    | /v1/users/activated        | Activate a specific user                          |
+| POST   | /v1/tokens/authentication  | Generate a new authentication token               |
 | PUT    | /v1/users/change-password  | Update the password of the request user           |
+| POST   | /v1/tokens/password-reset  | Generate a new password-reset token               |
 | PUT    | /v1/users/password         | Reset password of the request user                |
 | Patch  | /v1/users/update-details   | Update the profile details of the request user    |
 | PUT    | /v1/users/profile          | Update profile picture of the request user        |
@@ -76,9 +79,6 @@ The following targets are defined in the Makefile:
 | GET    | /profile/:filepath         | Serve Profile Picture                             |
 | DELETE | /v1/users/logout           | Logout a user                                     |
 | DELETE | /v1/users/delete           | Delete user account                               |
-| POST   | /v1/tokens/activation      | Generate a new user activation token              |
-| POST   | /v1/tokens/authentication  | Generate a new authentication token               |
-| POST   | /v1/tokens/password-reset  | Generate a new password-reset token               |
 | POST   | /v1/users/movie-permission | Give a user movie write permissions               |
 | GET    | /debug/vars                | Display application metrics                       |
 
