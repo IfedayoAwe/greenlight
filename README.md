@@ -63,8 +63,8 @@ The following targets are defined in the Makefile:
 |--------|----------------------------|-------------------------------------------------|-----------------------------------------------------------------------|
 | GET    | /v1/healthcheck            | Show application health and version information |                                                                       |
 | GET    | /v1/movies                 | Show the details of all movies                  |                                                                       |
-| POST   | /v1/movies                 | Create a new movie                              | { "genres": ["drama", "comedy"], "title": "Eve",                      |
-|        |                            |                                                 |   "runtime": "200 mins", "year":2003 }                                |
+| POST   | /v1/movies                 | Create a new movie                              | { "title": "Eve", "genres": [ "drama", "comedy" ],                    |
+|        |                            |                                                 |   "runtime": "200 mins", "year": 2003 }                               |
 | GET    | /v1/movies/:id             | Show the details of a specific movie            |                                                                       |
 | PATCH  | /v1/movies/:id             | Update the details of a specific movie          | { "title": "Vikings", "year": 2005 }                                  |
 | DELETE | /v1/movies/:id             | Delete a specific movie                         |                                                                       |
