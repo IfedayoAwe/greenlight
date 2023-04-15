@@ -76,7 +76,7 @@ The following targets are defined in the Makefile:
 |        |                            |                                                 |   "password": "pa5555word", "confirmpassword": "pa5555word" }         |
 | POST   | /v1/tokens/password-reset  | Generate a new password-reset token             | { "email": "ola@gmail.com" }                                          |
 | PUT    | /v1/users/password         | Reset password of the request user              | { "password": "pa5555word", "token": "PKBLFSOWSCGT7PBUXRBTLSACXQ" }   |
-| PATCH  | /v1/users/update-details   | Update the profile details of the request user  | { "name": "Ayo", "email":"ayo@gmail.com" }                            |
+| Patch  | /v1/users/update-details   | Update the profile details of the request user  | { "name": "Ayo", "email": "ayo@gmail.com" }                           |
 | PUT    | /v1/users/profile          | Update profile picture of the request user      | Pass the image                                                        |
 | GET    | /v1/users/profile          | Get the profile details of the request user     |                                                                       |
 | GET    | /profile/:filepath         | Serve Profile Picture                           |                                                                       |
