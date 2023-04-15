@@ -85,7 +85,7 @@ The following targets are defined in the Makefile:
 | POST   | /v1/users/movie-permission | Give a user movie write permissions             | { "email": "ola@gmail.com" }                                          |
 | GET    | /debug/vars                | Display application metrics                     |                                                                       |
 
-# Note
+### Note
 1. API's that grant access to only authenticated users must receive a token in the header of the request in the format key: Authorization, value: Bearer A4GKPNPGR6NMJLXWNR3JIGTAHQ.
 2. Content-Type for text is application/json
 2. To use the GET /v1/movies api to show the details of queried movies searching the "title" or "genre", paginate the movies data returned from the database setting page as the desired returned page and page_size as the number or data rows returned from the database (paginate value) and sort the returned data in a specific order, query parameters should be passed in the url in the format /v1/movies?title=godfather&genres=crime,drama&page=1&page_size=5&sort=-year. The only allowed sort parameters are (id, title, year, runtime, -id, -title, -year, -runtime).
