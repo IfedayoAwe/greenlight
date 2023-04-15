@@ -58,29 +58,30 @@ The following targets are defined in the Makefile:
 ```
 
 ## API Documentation
-| Method |   URL Pattern              |  Action                                           |
-|--------|----------------------------|---------------------------------------------------|
-| GET    | /v1/healthcheck            | Show application health and version information   |
-| GET    | /v1/movies                 | Show the details of all movies                    |
-| POST   | /v1/movies                 | Create a new movie                                |                                                           
-| GET    | /v1/movies/:id             | Show the details of a specific movie              |
-| PATCH  | /v1/movies/:id             | Update the details of a specific movie            |
-| DELETE | /v1/movies/:id             | Delete a specific movie                           |
-| POST   | /v1/users                  | Register a new user                               |
-| POST   | /v1/tokens/activation      | Generate a new user activation token              |
-| PUT    | /v1/users/activated        | Activate a specific user                          |
-| POST   | /v1/tokens/authentication  | Generate a new authentication token               |
-| PUT    | /v1/users/change-password  | Update the password of the request user           |
-| POST   | /v1/tokens/password-reset  | Generate a new password-reset token               |
-| PUT    | /v1/users/password         | Reset password of the request user                |
-| Patch  | /v1/users/update-details   | Update the profile details of the request user    |
-| PUT    | /v1/users/profile          | Update profile picture of the request user        |
-| GET    | /v1/users/profile          | Get the profile details of the request user       |
-| GET    | /profile/:filepath         | Serve Profile Picture                             |
-| DELETE | /v1/users/logout           | Logout a user                                     |
-| DELETE | /v1/users/delete           | Delete user account                               |
-| POST   | /v1/users/movie-permission | Give a user movie write permissions               |
-| GET    | /debug/vars                | Display application metrics                       |
+| Method |   URL Pattern              |  Action                                         |  Usage
+|--------|----------------------------|-------------------------------------------------|-----------------------------------------------------------------------
+| GET    | /v1/healthcheck            | Show application health and version information |
+| GET    | /v1/movies                 | Show the details of all movies                  |
+| POST   | /v1/movies                 | Create a new movie                              | { "genres": ["drama", "comedy"], "title": "Game Of Thrones", 
+|        |                            |                                                 | "runtime": "2000 mins", "year":2003 }
+| GET    | /v1/movies/:id             | Show the details of a specific movie            |
+| PATCH  | /v1/movies/:id             | Update the details of a specific movie          |
+| DELETE | /v1/movies/:id             | Delete a specific movie                         |
+| POST   | /v1/users                  | Register a new user                             |
+| POST   | /v1/tokens/activation      | Generate a new user activation token            |
+| PUT    | /v1/users/activated        | Activate a specific user                        |
+| POST   | /v1/tokens/authentication  | Generate a new authentication token             |
+| PUT    | /v1/users/change-password  | Update the password of the request user         |
+| POST   | /v1/tokens/password-reset  | Generate a new password-reset token             |
+| PUT    | /v1/users/password         | Reset password of the request user              |
+| Patch  | /v1/users/update-details   | Update the profile details of the request user  |
+| PUT    | /v1/users/profile          | Update profile picture of the request user      |
+| GET    | /v1/users/profile          | Get the profile details of the request user     |
+| GET    | /profile/:filepath         | Serve Profile Picture                           |
+| DELETE | /v1/users/logout           | Logout a user                                   |
+| DELETE | /v1/users/delete           | Delete user account                             |
+| POST   | /v1/users/movie-permission | Give a user movie write permissions             |
+| GET    | /debug/vars                | Display application metrics                     |
 
 ## Known Bugs
 There are no known issues.
