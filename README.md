@@ -59,13 +59,13 @@ The following targets are defined in the Makefile:
 
 ## API Documentation
 | Method |   URL Pattern              |  Action                                         |  Usage
-|--------|----------------------------|-------------------------------------------------|-----------------------------------------------------------------------
+|--------|----------------------------|-------------------------------------------------|---------------------------------------------------------------
 | GET    | /v1/healthcheck            | Show application health and version information |
 | GET    | /v1/movies                 | Show the details of all movies                  |
 | POST   | /v1/movies                 | Create a new movie                              | { "genres": ["drama", "comedy"], "title": "Game Of Thrones", 
 |        |                            |                                                 | "runtime": "2000 mins", "year":2003 }
 | GET    | /v1/movies/:id             | Show the details of a specific movie            |
-| PATCH  | /v1/movies/:id             | Update the details of a specific movie          |
+| PATCH  | /v1/movies/:id             | Update the details of a specific movie          | { "title": "Vikings", "year": 2005 }
 | DELETE | /v1/movies/:id             | Delete a specific movie                         |
 | POST   | /v1/users                  | Register a new user                             |
 | POST   | /v1/tokens/activation      | Generate a new user activation token            |
