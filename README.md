@@ -58,30 +58,38 @@ The following targets are defined in the Makefile:
 ```
 
 ## API Documentation
-| Method |   URL Pattern              |  Action                                         |  Usage
-|--------|----------------------------|-------------------------------------------------|---------------------------------------------------------------
-| GET    | /v1/healthcheck            | Show application health and version information |
-| GET    | /v1/movies                 | Show the details of all movies                  |
-| POST   | /v1/movies                 | Create a new movie                              | { "genres": ["drama", "comedy"], "title": "Game Of Thrones", 
-|        |                            |                                                 | "runtime": "2000 mins", "year":2003 }
-| GET    | /v1/movies/:id             | Show the details of a specific movie            |
-| PATCH  | /v1/movies/:id             | Update the details of a specific movie          | { "title": "Vikings", "year": 2005 }
-| DELETE | /v1/movies/:id             | Delete a specific movie                         |
-| POST   | /v1/users                  | Register a new user                             |
-| POST   | /v1/tokens/activation      | Generate a new user activation token            |
-| PUT    | /v1/users/activated        | Activate a specific user                        |
-| POST   | /v1/tokens/authentication  | Generate a new authentication token             |
-| PUT    | /v1/users/change-password  | Update the password of the request user         |
-| POST   | /v1/tokens/password-reset  | Generate a new password-reset token             |
-| PUT    | /v1/users/password         | Reset password of the request user              |
-| Patch  | /v1/users/update-details   | Update the profile details of the request user  |
-| PUT    | /v1/users/profile          | Update profile picture of the request user      |
-| GET    | /v1/users/profile          | Get the profile details of the request user     |
-| GET    | /profile/:filepath         | Serve Profile Picture                           |
-| DELETE | /v1/users/logout           | Logout a user                                   |
-| DELETE | /v1/users/delete           | Delete user account                             |
-| POST   | /v1/users/movie-permission | Give a user movie write permissions             |
-| GET    | /debug/vars                | Display application metrics                     |
+
+| Method |   URL Pattern              |  Action                                         |  Usage                                                                |
+|--------|----------------------------|-------------------------------------------------|-----------------------------------------------------------------------|
+| GET    | /v1/healthcheck            | Show application health and version information |                                                                       |
+| GET    | /v1/movies                 | Show the details of all movies                  |                                                                       |
+| POST   | /v1/movies                 | Create a new movie                              | { "genres": ["drama", "comedy"], "title": "Eve",                      |
+|        |                            |                                                 |   "runtime": "200 mins", "year":2003 }                                |
+| GET    | /v1/movies/:id             | Show the details of a specific movie            |                                                                       |
+| PATCH  | /v1/movies/:id             | Update the details of a specific movie          | { "title": "Vikings", "year": 2005 }                                  |
+| DELETE | /v1/movies/:id             | Delete a specific movie                         |                                                                       |
+| POST   | /v1/users                  | Register a new user                             | { "name": "Ola", "email": "ola@gmail.com", "password": "1234567890" } |
+| POST   | /v1/tokens/activation      | Generate a new user activation token            | { "email": "ola@gmail.com" }                                          |
+| PUT    | /v1/users/activated        | Activate a specific user                        | { "token": "ULJM6FU7WWGUTV5GBPTPC7IHKM"}                              |
+| POST   | /v1/tokens/authentication  | Generate a new authentication token             | { "email": "ola@gmail.com", "password": "1234567890" }                |
+| PUT    | /v1/users/change-password  | Update the password of the request user         | { "currentpassword": "1234567890",                                    |
+|        |                            |                                                 |   "password": "pa5555word", "confirmpassword": "pa5555word" }         |
+| POST   | /v1/tokens/password-reset  | Generate a new password-reset token             | { "email": "ola@gmail.com" }                                          |
+| PUT    | /v1/users/password         | Reset password of the request user              | { "password": "pa5555word", "token": "PKBLFSOWSCGT7PBUXRBTLSACXQ" }   |
+| Patch  | /v1/users/update-details   | Update the profile details of the request user  | { "name": "Ayo", "email": "ayo@gmail.com" }                           |
+| PUT    | /v1/users/profile          | Update profile picture of the request user      | Pass the image                                                        |
+| GET    | /v1/users/profile          | Get the profile details of the request user     |                                                                       |
+| GET    | /profile/:filepath         | Serve Profile Picture                           |                                                                       |
+| DELETE | /v1/users/logout           | Logout a user                                   |                                                                       |
+| DELETE | /v1/users/delete           | Delete user account                             |                                                                       |
+| POST   | /v1/users/movie-permission | Give a user movie write permissions             | { "email": "ola@gmail.com" }                                          |
+| GET    | /debug/vars                | Display application metrics                     |                                                                       |
+
+# Note
+1. API's that grant access to only authenticated users must receive a token in the header of the request in the format key: Authorization, value: Bearer A4GKPNPGR6NMJLXWNR3JIGTAHQ.
+2. Content-Type for text is application/json
+2. To use the GET /v1/movies api to show the details of queried movies searching the "title" or "genre", paginate the movies data returned from the database setting page as the desired returned page and page_size as the number or data rows returned from the database (paginate value) and sort the returned data in a specific order, query parameters should be passed in the url in the format /v1/movies?title=godfather&genres=crime,drama&page=1&page_size=5&sort=-year. The only allowed sort parameters are (id, title, year, runtime, -id, -title, -year, -runtime).
+3. To use the PUT /v1/users/profile the Content-Type header must be multipart/form-data.
 
 ## Known Bugs
 There are no known issues.
