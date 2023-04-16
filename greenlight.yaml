@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   greenlight:
-    image: greenlight: latest
+    image: greenlight:latest
     container_name: greenlight
     restart: unless-stopped
     ports: 
