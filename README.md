@@ -2,7 +2,7 @@
 A fully featured JSON API for creating, retrieving and managing information about movies and users of the API.
 
 ## Description
-A fast, secure, efficient, scallable and maintainable API server using Golang, a PostgreSQL database with migration files to make writing SQL migration easier and a Makefile to make running necessary development, code audit and build commands easier while also using the git hash to version build binaries. The idea behind this project is using dependency injection to implement efficient functions, using middleware and chaining handlers, taking into consideration best practices and writing efficient unit and integration tests, scallable project structure, vendoring third party packages, user authentication, securing the server and uses a PostgreSQL database but structured in a way that makes integration with other databases very easy. The project is designed as intended for usage in a production environment.
+A fast, secure, efficient, scallable and maintainable API server using Golang, a PostgreSQL database with migration files to make writing SQL migration easier and a Makefile to make running necessary development, code audit and build commands easier while also using the git hash to version build binaries. The idea behind this project is using dependency injection to implement efficient functions, using middleware and chaining handlers, taking into consideration best practices and writing efficient unit and integration tests, scallable project structure, vendoring third party packages, user authentication, securing the server and uses a PostgreSQL database but structured in a way that makes integration with other databases very easy. The project is designed as intended for usage in a production environment and a docker documentation and image link is provided below.
 
 ## Features
 * Healthckeck: Shows enviroment, availablility status and application version
@@ -90,6 +90,11 @@ The following targets are defined in the Makefile:
 2. Content-Type for text is application/json
 2. To use the GET /v1/movies api to show the details of queried movies searching the "title" or "genre", paginate the movies data returned from the database setting page as the desired returned page and page_size as the number or data rows returned from the database (paginate value) and sort the returned data in a specific order, query parameters should be passed in the url in the format /v1/movies?title=godfather&genres=crime,drama&page=1&page_size=5&sort=-year. The only allowed sort parameters are (id, title, year, runtime, -id, -title, -year, -runtime).
 3. To use the PUT /v1/users/profile the Content-Type header must be multipart/form-data.
+
+## Docker Image
+ <a href="https://hub.docker.com/r/ifedayoawe/greenlight" target="_blank"> Greenlight-docker-image </a>
+To pull the docker image **docker pull ifedayoawe/greenlight:1** which will automatically pull the image.
+The default application port is **4000**, an easy way would be to use my greenlight.yaml docker-compose file to automate the process, of course a .env file containing the DBPASS, DBNAME, and GREENLIGHT_DB_DSN enviromental variables would be needed and also executing the SQL migration files to create the necessary tables would be needed.
 
 ## Known Bugs
 There are no known issues.

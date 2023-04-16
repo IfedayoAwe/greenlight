@@ -134,8 +134,9 @@ docker: $(SOURCES) Dockerfile
 	@echo 'Building docker image...'
 	docker build -t greenlight:latest -f Dockerfile --build-arg VERSION=$(git_description) --build-arg BUILDTIME=$(current_time) .
 
-# docker: $(SOURCES) Dockerfile
-# 	@echo 'Building docker image...'
-# 	docker build -t greenlight:latest . -f Dockerfile --build-arg VERSION=$(git_description) BUILDTIME=$(current_time)
+.PHONY: publish
+publish:
+	docker tag greenlight:latest ifedayoawe/greenlight:latest
+	docker push ifedayoawe/greenlight:latest
 
 .PHONY: help startdb createdb dropdb migrateup migratedown confirm run docker/compose/up docker/compose/down migration vendor build/api tests
