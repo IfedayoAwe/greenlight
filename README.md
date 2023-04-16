@@ -93,7 +93,7 @@ The following targets are defined in the Makefile:
 
 ## Docker Image
  <a href="https://hub.docker.com/r/ifedayoawe/greenlight" target="_blank"> Greenlight-docker-image </a>
-To pull the docker image **docker pull ifedayoawe/greenlight:1** which will automatically pull the image.
+To pull the docker image **docker pull ifedayoawe/greenlight:latest** which will automatically pull the image.
 The default application port is **4000**, an easy way would be to use my greenlight.yaml docker-compose file to automate the process, of course a .env file containing the DBPASS, DBNAME, and GREENLIGHT_DB_DSN enviromental variables would be needed and also executing the SQL migration files to create the necessary tables would be needed.
 
 ## Known Bugs
