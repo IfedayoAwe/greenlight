@@ -1,3 +1,5 @@
+SOURCES := $(wildcard *.go cmd/*/*.go pkg/*/*/*.go)
+
 # ==================================================================================== #
 # HELPERS
 # ==================================================================================== #
@@ -60,7 +62,7 @@ run:
 .PHONY: docker/compose/up
 docker/compose/up:
 	@echo 'starting greenlight containers'
-	docker-compose -f greenlight.yaml up -d
+	docker-compose -f greenlight.yaml up
 
 ## docker/compose/down: stop and remove all running containers in greenlight.yaml file
 .PHONY: docker/compose/down
@@ -121,5 +123,19 @@ build/api:
 	@echo 'Building cmd/api...'
 	go build -ldflags=${linker_flags} -o=./bin/api ./cmd/api
 	GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/api ./cmd/api
+
+# ==================================================================================== #
+# Docker
+# ==================================================================================== #
+
+## docker: build the docker image
+.PHONY: docker
+docker: $(SOURCES) Dockerfile
+	@echo 'Building docker image...'
+	docker build -t greenlight:latest -f Dockerfile --build-arg VERSION=$(git_description) --build-arg BUILDTIME=$(current_time) .
+
+# docker: $(SOURCES) Dockerfile
+# 	@echo 'Building docker image...'
+# 	docker build -t greenlight:latest . -f Dockerfile --build-arg VERSION=$(git_description) BUILDTIME=$(current_time)
 
 .PHONY: help startdb createdb dropdb migrateup migratedown confirm run docker/compose/up docker/compose/down migration vendor build/api tests

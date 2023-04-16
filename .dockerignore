@@ -1,0 +1,8 @@
+Dockerfile
+.git
+.gitignore
+.env
+*.log
+LICENSE
+README.md
+greenlight.yaml

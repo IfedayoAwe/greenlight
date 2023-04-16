@@ -124,6 +124,7 @@ func (p ProfileModel) Insert(profile *UserProfile) error {
 func (p ProfileModel) InsertProfilePic(userID int64) error {
 	fileName := fmt.Sprintf("%d%d%s", userID, time.Now().UnixNano(), ".jpg")
 	filePath := filepath.Join("images/profile", fileName)
+	newFilePath := filepath.Join("profile", fileName)
 
 	err := copyDefaultImage(filePath)
 	if err != nil {
@@ -131,7 +132,7 @@ func (p ProfileModel) InsertProfilePic(userID int64) error {
 	}
 
 	userProfile := &UserProfile{
-		ImagePath: filePath,
+		ImagePath: newFilePath,
 		UserID:    userID,
 	}
 
