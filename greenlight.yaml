@@ -1,16 +1,16 @@
 version: '3.8'
 
 services:
-  # greenlight:
-  #   image: greenlight:latest
-  #   container_name: greenlight
-  #   restart: unless-stopped
-  #   ports: 
-  #     - '4000:4000'
-  #   environment:
-  #     - GREENLIGHT_DB_DSN=${GREENLIGHT_DB_DSN}
-  #   volumes:
-  #     - ./images/profile:/home/greenlight/images/profile
+  greenlight:
+    image: greenlight:latest
+    container_name: greenlight
+    restart: unless-stopped
+    ports: 
+      - '4000:4000'
+    environment:
+      - GREENLIGHT_DB_DSN=${GREENLIGHT_DB_DSN}
+    volumes:
+      - ./images/profile:/home/greenlight/images/profile
 
   greenlight_db:
     image: postgres:15-alpine

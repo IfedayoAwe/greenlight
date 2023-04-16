@@ -62,7 +62,7 @@ run:
 .PHONY: docker/compose/up
 docker/compose/up:
 	@echo 'starting greenlight containers'
-	docker-compose -f greenlight.yaml up
+	docker-compose -f greenlight.yaml up -d
 
 ## docker/compose/down: stop and remove all running containers in greenlight.yaml file
 .PHONY: docker/compose/down
