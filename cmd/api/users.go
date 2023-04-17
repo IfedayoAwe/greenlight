@@ -62,7 +62,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	app.background(func() {
-		err = app.models.UsersProfile.InsertProfilePic(user.ID)
+		err := app.models.UsersProfile.InsertProfilePic(user.ID)
 		if err != nil {
 			switch {
 			case errors.Is(err, data.ErrDuplicateProfile):
@@ -87,7 +87,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	app.background(func() {
-		err = app.mailer.Send(user.Email, "user_welcome.html", data)
+		err := app.mailer.Send(user.Email, "user_welcome.html", data)
 		if err != nil {
 			app.logger.PrintError(err, nil)
 		}
