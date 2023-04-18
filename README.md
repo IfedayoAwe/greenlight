@@ -2,7 +2,7 @@
 A fully featured JSON API for creating, retrieving and managing information about movies and users of the API.
 
 ## Description
-A fast, secure, efficient, scallable and maintainable API server using Golang, a PostgreSQL database with migration files to make writing SQL migration easier and a Makefile to make running necessary development, code audit and build commands easier while also using the git hash to version build binaries. The idea behind this project is using dependency injection to implement efficient functions, using middleware and chaining handlers, taking into consideration best practices and writing efficient unit and integration tests, scallable project structure, vendoring third party packages, user authentication, securing the server and uses a PostgreSQL database but structured in a way that makes integration with other databases very easy. The project is designed as intended for usage in a production environment and a docker documentation and image link is provided below.
+A fast, secure, efficient, scallable and maintainable API server using Golang, a PostgreSQL database with migration files to make SQL migration easier and a Makefile to make running necessary development, code audit and build commands easier while also using the git hash to version build binaries. The idea behind this project is using dependency injection to implement efficient functions, using middleware and chaining handlers, taking into consideration best practices and writing efficient unit and integration tests, scallable project structure, vendoring third party packages, securing the server and uses a PostgreSQL database but structured in a way that makes integration with other databases very easy. The project is designed as intended for usage in a production environment. Features an API documentation with a docker documentation and image link is provided below for any.
 
 ## Features
 * Healthckeck: Shows enviroment, availablility status and application version
@@ -37,7 +37,8 @@ A fast, secure, efficient, scallable and maintainable API server using Golang, a
 * Displaying Application Metrics
 
 ## Installation
-Clone the repo, set up a PostgreSQL database and execute the SQL migration files to create the necessary tables needed for the application to run and run **make run**
+Clone the repo, set up a PostgreSQL database and execute the SQL migration files to create the necessary tables needed for the application to run and run **make run**. 
+Use command line flags to change default configuration or use enviromental variables to explicitly set GREENLIGHT_DB_DSN, SMTP_USERNAME, SMTP_PASSWORD, SMTP_SENDER, SMTP_HOST enviromental variables.
 
 The following targets are defined in the Makefile:
 ```
@@ -59,7 +60,7 @@ The following targets are defined in the Makefile:
 
 ## API Documentation
 
-| Method |   URL Pattern              |  Action                                         |  Usage                                                                |
+| Method |   URL Pattern              |  Action                                         |  Usage(Request body)                                                  |
 |--------|----------------------------|-------------------------------------------------|-----------------------------------------------------------------------|
 | GET    | /v1/healthcheck            | Show application health and version information |                                                                       |
 | GET    | /v1/movies                 | Show the details of all movies                  |                                                                       |
@@ -93,8 +94,8 @@ The following targets are defined in the Makefile:
 
 ## Docker Image
  <a href="https://hub.docker.com/r/ifedayoawe/greenlight" target="_blank"> Greenlight-docker-image </a>
-To pull the docker image **docker pull ifedayoawe/greenlight:latest** which will automatically pull the image.
-The default application port is **4000**, an easy way would be to use my greenlight.yaml docker-compose file to automate the process, of course a .env file containing the DBPASS, DBNAME, and GREENLIGHT_DB_DSN enviromental variables would be needed and also executing the SQL migration files to create the necessary tables would be needed.
+To pull the docker image **docker pull ifedayoawe/greenlight:latest** which will automatically pull the latest image.
+The default application port is **4000**, an easy way would be to use my greenlight.yaml docker-compose file to automate the process, of course a .env file containing the DBPASS, DBNAME, SMTP_USERNAME, SMTP_PASSWORD, SMTP_SENDER, SMTP_HOST and GREENLIGHT_DB_DSN enviromental variables would be needed and also executing the SQL migration files to create the necessary tables would be needed.
 
 ## Known Bugs
 There are no known issues.

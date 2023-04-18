@@ -9,6 +9,10 @@ services:
       - '4000:4000'
     environment:
       - GREENLIGHT_DB_DSN=${GREENLIGHT_DB_DSN}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_SENDER=${SMTP_SENDER}
+      - SMTP_HOST=${SMTP_HOST}
     volumes:
       - ./images/profile:/home/greenlight/images/profile
 
