@@ -16,6 +16,7 @@ func TestRegisterUser(t *testing.T) {
 		Name     string
 		Email    string
 		Password string
+		Role     string
 	}
 
 	user1 := struct {
@@ -30,12 +31,13 @@ func TestRegisterUser(t *testing.T) {
 		Email    string
 		Password string
 	}{"olalekan@gmail.com", "1234567890"}
-	user4 := user{"Olalekan", "olalekan99@gmail.com", "1234567890"}
-	user5 := user{"Olalekan Awe", "olalekanawe99@gmail.com", "1234567890"}
-	user6 := user{"", "", ""}
-	user7 := user{"Olalekan Awe", "ola.com", "1234567890"}
-	user8 := user{"Olalekan Awe", "olalekan99@gmail.com", "123"}
+	user4 := user{"Olalekan", "olalekan99@gmail.com", "1234567890", "viewer"}
+	user5 := user{"Olalekan Awe", "olalekanawe99@gmail.com", "1234567890", "viewer"}
+	user6 := user{"", "", "", ""}
+	user7 := user{"Olalekan Awe", "ola.com", "1234567890", "viewer"}
+	user8 := user{"Olalekan Awe", "olalekan99@gmail.com", "123", "viewer"}
 	user9 := struct{ Foo string }{"1234567890"}
+	user10 := user{"Olalekan", "olalekan99@gmail.com", "1234567890", "contributor"}
 
 	tests := []struct {
 		name     string
@@ -46,12 +48,13 @@ func TestRegisterUser(t *testing.T) {
 		{"Email", user1, http.StatusUnprocessableEntity, []byte("\"email\": \"must be provided\"")},
 		{"Password", user2, http.StatusUnprocessableEntity, []byte("\"password\": \"must be provided\"")},
 		{"Name", user3, http.StatusUnprocessableEntity, []byte("\"name\": \"must be provided\"")},
-		{"NewUser", user4, http.StatusAccepted, []byte("olalekan99@gmail.com")},
+		{"NewUserViewer", user4, http.StatusAccepted, []byte("olalekan99@gmail.com")},
 		{"DuplicateUser", user5, http.StatusUnprocessableEntity, []byte("a user with this email address already exists")},
 		{"EmptyParameters", user6, http.StatusUnprocessableEntity, []byte("must be provided")},
 		{"invalidEmail", user7, http.StatusUnprocessableEntity, []byte("must be a valid email address")},
 		{"invalidPassword", user8, http.StatusUnprocessableEntity, []byte("\"password\": \"must be at least 10 bytes long\"")},
 		{"UnknownKey", user9, http.StatusBadRequest, []byte("body contains unknown key")},
+		{"NewUserContributor", user10, http.StatusAccepted, []byte("olalekan99@gmail.com")},
 	}
 
 	for _, tt := range tests {

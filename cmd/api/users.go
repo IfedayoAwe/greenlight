@@ -15,6 +15,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Name     string `json:"name"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
+		Role     string `json:"role"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -55,10 +56,18 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.models.Permissions.AddForUser(user.ID, "movies:read")
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
+	if input.Role == "contributor" {
+		err = app.models.Permissions.AddForUser(user.ID, "movies:read", "movies:write")
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+	} else {
+		err = app.models.Permissions.AddForUser(user.ID, "movies:read")
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
 	}
 
 	app.background(func() {
