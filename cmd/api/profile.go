@@ -152,8 +152,7 @@ func (app *application) getUserProfileHandler(w http.ResponseWriter, r *http.Req
 }
 
 func (app *application) showProfilePictureHandler(w http.ResponseWriter, r *http.Request) {
-	ps := httprouter.ParamsFromContext(r.Context())
-	filePath := ps.ByName("filepath")
+	filePath := httprouter.ParamsFromContext(r.Context()).ByName("filepath")
 	path := filepath.Join("./images/profile", filePath)
 	http.ServeFile(w, r, filepath.FromSlash(filepath.Clean(path)))
 }
