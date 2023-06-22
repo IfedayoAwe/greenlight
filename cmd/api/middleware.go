@@ -194,6 +194,49 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 	})
 }
 
+// type WrappedResponseWriter struct {
+// 	w  http.ResponseWriter
+// 	gw *gzip.Writer
+// }
+
+// func NewWrappedResponseWriter(w http.ResponseWriter) *WrappedResponseWriter {
+// 	gw := gzip.NewWriter(w)
+// 	return &WrappedResponseWriter{w: w, gw: gw}
+
+// }
+
+// func (ww WrappedResponseWriter) Header() http.Header {
+// 	return ww.w.Header()
+// }
+
+// func (ww WrappedResponseWriter) Write(data []byte) (int, error) {
+// 	return ww.gw.Write(data)
+// }
+
+// func (ww WrappedResponseWriter) WriteHeader(statuscode int) {
+// 	ww.w.WriteHeader(statuscode)
+// }
+
+// func (ww WrappedResponseWriter) Flush() {
+// 	ww.gw.Flush()
+// 	ww.gw.Close()
+// }
+
+// func (app *application) enableGzip(next http.HandlerFunc) http.HandlerFunc {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		w.Header().Add("Vary", "Accept-Encoding")
+// 		acceptEncodingHeader := r.Header.Get("Accept-Encoding")
+// 		if strings.Contains(acceptEncodingHeader, "gzip") {
+// 			ww := NewWrappedResponseWriter(w)
+// 			defer ww.Flush()
+// 			ww.Header().Set("Content-Encoding", "gzip")
+// 			next.ServeHTTP(ww, r)
+// 			return
+// 		}
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
+
 func (app *application) metrics(next http.Handler) http.Handler {
 	if app.config.metrics.enabled {
 		totalRequestsReceived := expvar.NewInt("total_requests_received")

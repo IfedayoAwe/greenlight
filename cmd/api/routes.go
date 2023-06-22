@@ -31,11 +31,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/v1/users/delete", app.requireActivatedUser(app.deleteUserAccountHandler))
 	router.HandlerFunc(http.MethodPost, "/v1/users/movie-permission", app.requireAdmin(app.addMovieWritePermissionForUser))
 
-	handler := http.StripPrefix("/profile", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ps := httprouter.ParamsFromContext(r.Context())
-		app.showProfilePictureHandler(w, r, ps)
-	}))
+	handler := http.StripPrefix("/profile", http.HandlerFunc(app.showProfilePictureHandler))
 	router.HandlerFunc(http.MethodGet, "/profile/:filepath", app.requireActivatedUser(handler.ServeHTTP))
+	// router.HandlerFunc(http.MethodGet, "/profile/:filepath", app.requireActivatedUser(app.enableGzip(handler.ServeHTTP)))
 
 	router.Handler(http.MethodGet, "/debug/vars", expvar.Handler())
 	return app.metrics(app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router)))))
