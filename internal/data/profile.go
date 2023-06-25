@@ -9,6 +9,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 	"time"
@@ -38,7 +39,7 @@ func validateAspectRatio(v *validator.Validator, img image.Image) image.Image {
 	return img
 }
 
-func ValidateProfilePicture(v *validator.Validator, fileHeaderSize int64, ext string, file io.Reader) (image.Image, error) {
+func ValidateProfilePicture(v *validator.Validator, fileHeaderSize int64, ext string, file multipart.File) (image.Image, error) {
 	fileExtensionErrorMessage := fmt.Sprintf("Invalid file type. Allowed file types are %s", allowedExtensions)
 	fileSizeErrorMessage := fmt.Sprintf("File size exceeds the limit of %d bytes", maxFileSize)
 	v.Check(fileHeaderSize <= maxFileSize, "file", fileSizeErrorMessage)
